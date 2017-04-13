@@ -43,7 +43,7 @@
     </developers>
 
     <parent>
-        <groupId>io.searchbox</groupId>
+        <groupId>org.graylog.jest</groupId>
         <artifactId>jest-parent</artifactId>
         <version>2.4.1-SNAPSHOT</version>
     </parent>

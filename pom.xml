@@ -3,7 +3,7 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>io.searchbox</groupId>
+    <groupId>org.graylog.jest</groupId>
     <artifactId>jest-parent</artifactId>
     <packaging>pom</packaging>
     <version>2.4.1-SNAPSHOT</version>
@@ -26,9 +26,9 @@
     </licenses>
 
     <scm>
-        <connection>scm:git:git@github.com:searchbox-io/Jest.git</connection>
-        <developerConnection>scm:git:git@github.com:searchbox-io/Jest.git</developerConnection>
-        <url>git@github.com:searchbox-io/Jest.git</url>
+        <connection>scm:git:git@github.com:graylog-labs/Jest.git</connection>
+        <developerConnection>scm:git:git@github.com:graylog-labs/Jest.git</developerConnection>
+        <url>git@github.com:graylog-labs/Jest.git</url>
     </scm>
 
     <distributionManagement>
@@ -54,6 +54,12 @@
             <name>Cihat Keser</name>
             <email>info@cihatkeser.com</email>
             <url>http://about.cihatkeser.com</url>
+        </developer>
+        <developer>
+            <id>graylog</id>
+            <name>Graylog, Inc.</name>
+            <organization>Graylog, Inc.</organization>
+            <organizationUrl>https://www.graylog.org/</organizationUrl>
         </developer>
     </developers>
 
@@ -254,7 +260,7 @@
             </dependency>
 
             <dependency>
-                <groupId>io.searchbox</groupId>
+                <groupId>org.graylog.jest</groupId>
                 <artifactId>jest-common</artifactId>
                 <version>2.4.1-SNAPSHOT</version>
             </dependency>
