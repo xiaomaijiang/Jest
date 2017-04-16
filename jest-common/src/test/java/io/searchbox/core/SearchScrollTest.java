@@ -6,6 +6,7 @@ import io.searchbox.action.Action;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.Collections;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -31,11 +32,13 @@ public class SearchScrollTest {
     public void methodIsPostIfScrollIdIsLong() throws IOException {
         String scrollId = Strings.padStart("scrollId", 2000, 'x');
 
+        final String expectedResults = "{\"scroll_id\":\""+scrollId+"\"}";
+
         Action searchScroll = new SearchScroll.Builder(scrollId, "1m").build();
         String uri = searchScroll.getURI();
 
         assertEquals("POST", searchScroll.getRestMethodName());
-        assertEquals(scrollId, searchScroll.getData(new ObjectMapper()));
+        assertEquals(expectedResults, searchScroll.getData(new ObjectMapper()));
         assertTrue(uri.length() < 2000);
         assertFalse(uri.contains(scrollId));
     }

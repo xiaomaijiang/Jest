@@ -14,12 +14,14 @@ public class SearchScroll extends GenericResultAbstractAction {
     static final int MAX_SCROLL_ID_LENGTH = 1900;
     private final String restMethodName;
 
+
     protected SearchScroll(Builder builder) {
         super(builder);
 
         if(builder.getScrollId().length() > MAX_SCROLL_ID_LENGTH) {
             this.restMethodName = "POST";
-            this.payload = builder.getScrollId();
+            // represent scroll_id in json for request body
+            this.payload = "{\"scroll_id\":\"" + builder.getScrollId() + "\"}";
         } else {
             this.restMethodName = "GET";
         }
