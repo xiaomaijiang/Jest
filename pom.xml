@@ -66,9 +66,9 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <elasticsearch.version>2.4.1</elasticsearch.version>
+        <elasticsearch.version>2.4.5</elasticsearch.version>
 
-        <lucene.version>5.5.2</lucene.version>
+        <lucene.version>5.5.4</lucene.version>
         <jna.version>4.1.0</jna.version>
         <hamcrest.version>1.3</hamcrest.version>
         <randomizedtesting.version>2.2.0</randomizedtesting.version>
