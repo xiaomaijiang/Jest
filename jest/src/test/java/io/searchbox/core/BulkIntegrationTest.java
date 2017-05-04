@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.action.get.GetRequest;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.plugins.Plugin;
@@ -245,7 +244,7 @@ public class BulkIntegrationTest extends AbstractIntegrationTest {
         source.put("user", "kimchy");
         Bulk bulk = new Bulk.Builder()
                 .addAction(new Index.Builder(source).index(index).type(type).id(id).build())
-                .addAction(new Update.Builder(StringUtils.chomp(script)).index(index).type(type).id(id).build())
+                .addAction(new Update.Builder(script).index(index).type(type).id(id).build())
                 .build();
 
         BulkResult result = client.execute(bulk);

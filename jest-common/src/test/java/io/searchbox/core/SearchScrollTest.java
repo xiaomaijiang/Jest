@@ -1,8 +1,8 @@
 package io.searchbox.core;
 
+import com.google.common.base.Strings;
 import com.google.gson.Gson;
 import io.searchbox.action.Action;
-import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -11,7 +11,7 @@ import static org.junit.Assert.*;
 public class SearchScrollTest {
     @Test
     public void methodIsGetIfScrollIdIsShort() {
-        String scrollId = StringUtils.leftPad("scrollId", SearchScroll.MAX_SCROLL_ID_LENGTH, 'x');
+        String scrollId = Strings.padStart("scrollId", SearchScroll.MAX_SCROLL_ID_LENGTH, 'x');
         Action searchScroll = new SearchScroll.Builder(scrollId, "1m").build();
         String uri = searchScroll.getURI();
 
@@ -23,7 +23,8 @@ public class SearchScrollTest {
 
     @Test
     public void methodIsPostIfScrollIdIsLong() {
-        String scrollId = StringUtils.leftPad("scrollId", 2000, 'x');
+        String scrollId = Strings.padStart("scrollId", 2000, 'x');
+
         Action searchScroll = new SearchScroll.Builder(scrollId, "1m").build();
         String uri = searchScroll.getURI();
 
