@@ -45,7 +45,7 @@
     <parent>
         <groupId>org.graylog.jest</groupId>
         <artifactId>jest-parent</artifactId>
-        <version>5.0.0-beta.1</version>
+        <version>5.0.0-beta.2-SNAPSHOT</version>
     </parent>
 
     <dependencies>
