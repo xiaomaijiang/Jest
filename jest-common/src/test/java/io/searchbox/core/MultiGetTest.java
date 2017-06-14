@@ -1,15 +1,15 @@
 package io.searchbox.core;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-
-import java.util.Arrays;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.json.JSONException;
 import org.junit.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 
-import com.google.gson.Gson;
+import java.io.IOException;
+import java.util.Arrays;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 
 /**
  * @author Dogukan Sonmez
@@ -21,7 +21,7 @@ public class MultiGetTest {
     Doc doc3 = new Doc("twitter", "tweet", "3");
 
     @Test
-    public void getMultipleDocs() throws JSONException {
+    public void getMultipleDocs() throws JSONException, IOException {
         MultiGet get = new MultiGet.Builder.ByDoc(Arrays.asList(doc1, doc2, doc3)).build();
 
         assertEquals("GET", get.getRestMethodName());
@@ -30,7 +30,7 @@ public class MultiGetTest {
                 "{\"_index\":\"twitter\",\"_type\":\"tweet\",\"_id\":\"1\"}," +
                 "{\"_index\":\"twitter\",\"_type\":\"tweet\",\"_id\":\"2\"}," +
                 "{\"_index\":\"twitter\",\"_type\":\"tweet\",\"_id\":\"3\"}]}",
-                get.getData(new Gson()), false);
+                get.getData(new ObjectMapper()), false);
     }
 
     @Test
@@ -50,12 +50,12 @@ public class MultiGetTest {
     }
 
     @Test
-    public void getDocumentWithMultipleIds() throws JSONException {
+    public void getDocumentWithMultipleIds() throws JSONException, IOException {
         MultiGet get = new MultiGet.Builder.ById("twitter", "tweet").addId(Arrays.asList("1", "2", "3")).build();
 
         assertEquals("GET", get.getRestMethodName());
         assertEquals("twitter/tweet/_mget", get.getURI());
-        JSONAssert.assertEquals("{\"ids\":[\"1\",\"2\",\"3\"]}", get.getData(new Gson()), false);
+        JSONAssert.assertEquals("{\"ids\":[\"1\",\"2\",\"3\"]}", get.getData(new ObjectMapper()), false);
     }
 
     @Test

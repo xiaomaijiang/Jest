@@ -1,8 +1,10 @@
 package io.searchbox.core;
 
-import com.google.gson.Gson;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.searchbox.action.AbstractAction;
 import io.searchbox.action.AbstractMultiTypeActionBuilder;
+
+import java.io.IOException;
 
 /**
  * @author Dogukan Sonmez
@@ -28,8 +30,8 @@ public class Count extends AbstractAction<CountResult> {
     }
 
     @Override
-    public CountResult createNewElasticSearchResult(String responseBody, int statusCode, String reasonPhrase, Gson gson) {
-        return createNewElasticSearchResult(new CountResult(gson), responseBody, statusCode, reasonPhrase, gson);
+    public CountResult createNewElasticSearchResult(String responseBody, int statusCode, String reasonPhrase, ObjectMapper objectMapper) throws IOException {
+        return createNewElasticSearchResult(new CountResult(objectMapper), responseBody, statusCode, reasonPhrase, objectMapper);
     }
 
     @Override

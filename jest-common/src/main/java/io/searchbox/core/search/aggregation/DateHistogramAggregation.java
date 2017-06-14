@@ -1,14 +1,15 @@
 package io.searchbox.core.search.aggregation;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import com.fasterxml.jackson.databind.JsonNode;
 
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
-import static io.searchbox.core.search.aggregation.AggregationField.*;
+import static io.searchbox.core.search.aggregation.AggregationField.BUCKETS;
+import static io.searchbox.core.search.aggregation.AggregationField.DOC_COUNT;
+import static io.searchbox.core.search.aggregation.AggregationField.KEY;
+import static io.searchbox.core.search.aggregation.AggregationField.KEY_AS_STRING;
 
 /**
  * @author cfstout
@@ -19,20 +20,20 @@ public class DateHistogramAggregation extends BucketAggregation {
 
     private List<DateHistogram> dateHistograms = new LinkedList<DateHistogram>();
 
-    public DateHistogramAggregation(String name, JsonObject dateHistogramAggregation) {
+    public DateHistogramAggregation(String name, JsonNode dateHistogramAggregation) {
         super(name, dateHistogramAggregation);
-        if (dateHistogramAggregation.has(String.valueOf(BUCKETS)) && dateHistogramAggregation.get(String.valueOf(BUCKETS)).isJsonArray()) {
-            parseBuckets(dateHistogramAggregation.get(String.valueOf(BUCKETS)).getAsJsonArray());
+        if (dateHistogramAggregation.has(String.valueOf(BUCKETS)) && dateHistogramAggregation.get(String.valueOf(BUCKETS)).isArray()) {
+            parseBuckets(dateHistogramAggregation.get(String.valueOf(BUCKETS)));
         }
     }
 
-    private void parseBuckets(JsonArray bucketsSource) {
-        for (JsonElement bucket : bucketsSource) {
-            Long time = bucket.getAsJsonObject().get(String.valueOf(KEY)).getAsLong();
-            String timeAsString = bucket.getAsJsonObject().get(String.valueOf(KEY_AS_STRING)).getAsString();
-            Long count = bucket.getAsJsonObject().get(String.valueOf(DOC_COUNT)).getAsLong();
+    private void parseBuckets(JsonNode bucketsSource) {
+        for (JsonNode bucket : bucketsSource) {
+            Long time = bucket.get(String.valueOf(KEY)).asLong();
+            String timeAsString = bucket.get(String.valueOf(KEY_AS_STRING)).asText();
+            Long count = bucket.get(String.valueOf(DOC_COUNT)).asLong();
 
-            dateHistograms.add(new DateHistogram(bucket.getAsJsonObject(), time, timeAsString, count));
+            dateHistograms.add(new DateHistogram(bucket, time, timeAsString, count));
         }
     }
 
@@ -47,7 +48,7 @@ public class DateHistogramAggregation extends BucketAggregation {
 
         private String timeAsString;
 
-        DateHistogram(JsonObject bucket, Long time, String timeAsString, Long count) {
+        DateHistogram(JsonNode bucket, Long time, String timeAsString, Long count) {
             super(bucket, time, count);
             this.timeAsString = timeAsString;
         }

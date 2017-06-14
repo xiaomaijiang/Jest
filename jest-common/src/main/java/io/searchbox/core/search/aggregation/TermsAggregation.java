@@ -1,8 +1,7 @@
 package io.searchbox.core.search.aggregation;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -12,8 +11,10 @@ import static io.searchbox.core.search.aggregation.AggregationField.BUCKETS;
 import static io.searchbox.core.search.aggregation.AggregationField.DOC_COUNT;
 import static io.searchbox.core.search.aggregation.AggregationField.DOC_COUNT_ERROR_UPPER_BOUND;
 import static io.searchbox.core.search.aggregation.AggregationField.KEY;
+import static io.searchbox.core.search.aggregation.AggregationField.KEY_AS_STRING;
 import static io.searchbox.core.search.aggregation.AggregationField.SUM_OTHER_DOC_COUNT;
-import static io.searchbox.core.search.aggregation.AggregationField.KEY_AS_STRING;;
+
+;
 
 /**
  * @author cfstout
@@ -27,27 +28,27 @@ public class TermsAggregation extends BucketAggregation {
     private Long sumOtherDocCount;
     private List<Entry> buckets = new LinkedList<Entry>();
 
-    public TermsAggregation(String name, JsonObject termAggregation) {
+    public TermsAggregation(String name, JsonNode termAggregation) {
         super(name, termAggregation);
         if (termAggregation.has(String.valueOf(DOC_COUNT_ERROR_UPPER_BOUND))) {
-            docCountErrorUpperBound = termAggregation.get(String.valueOf(DOC_COUNT_ERROR_UPPER_BOUND)).getAsLong();
+            docCountErrorUpperBound = termAggregation.get(String.valueOf(DOC_COUNT_ERROR_UPPER_BOUND)).asLong();
         }
         if (termAggregation.has(String.valueOf(SUM_OTHER_DOC_COUNT))) {
-            sumOtherDocCount = termAggregation.get(String.valueOf(SUM_OTHER_DOC_COUNT)).getAsLong();
+            sumOtherDocCount = termAggregation.get(String.valueOf(SUM_OTHER_DOC_COUNT)).asLong();
         }
 
-        if (termAggregation.has(String.valueOf(BUCKETS)) && termAggregation.get(String.valueOf(BUCKETS)).isJsonArray()) {
-            parseBuckets(termAggregation.get(String.valueOf(BUCKETS)).getAsJsonArray());
+        if (termAggregation.has(String.valueOf(BUCKETS)) && termAggregation.get(String.valueOf(BUCKETS)).isArray()) {
+            parseBuckets(termAggregation.get(String.valueOf(BUCKETS)));
         }
     }
 
-    private void parseBuckets(JsonArray bucketsSource) {
-        for(JsonElement bucketElement : bucketsSource) {
-            JsonObject bucket = (JsonObject) bucketElement;
+    private void parseBuckets(JsonNode bucketsSource) {
+        for(JsonNode bucketElement : bucketsSource) {
+            ObjectNode bucket = (ObjectNode) bucketElement;
             if (bucket.has(String.valueOf(KEY_AS_STRING))) {
-            	buckets.add(new Entry(bucket, bucket.get(String.valueOf(KEY)).getAsString(), bucket.get(String.valueOf(KEY_AS_STRING)).getAsString(), bucket.get(String.valueOf(DOC_COUNT)).getAsLong()));
+            	buckets.add(new Entry(bucket, bucket.get(String.valueOf(KEY)).asText(), bucket.get(String.valueOf(KEY_AS_STRING)).asText(), bucket.get(String.valueOf(DOC_COUNT)).asLong()));
             } else {
-            	buckets.add(new Entry(bucket, bucket.get(String.valueOf(KEY)).getAsString(), bucket.get(String.valueOf(DOC_COUNT)).getAsLong()));
+            	buckets.add(new Entry(bucket, bucket.get(String.valueOf(KEY)).asText(), bucket.get(String.valueOf(DOC_COUNT)).asLong()));
             }
         }
     }
@@ -68,11 +69,11 @@ public class TermsAggregation extends BucketAggregation {
         private String key;
         private String keyAsString;
 
-        public Entry(JsonObject bucket, String key, Long count) {
+        public Entry(ObjectNode bucket, String key, Long count) {
             this(bucket, key, key, count);
         }
 
-        public Entry(JsonObject bucket, String key, String keyAsString, Long count) {
+        public Entry(ObjectNode bucket, String key, String keyAsString, Long count) {
         	super(bucket, count);
         	this.key = key;
         	this.keyAsString = keyAsString;

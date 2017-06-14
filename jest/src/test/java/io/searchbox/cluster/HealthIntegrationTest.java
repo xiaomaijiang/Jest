@@ -20,7 +20,7 @@ public class HealthIntegrationTest extends AbstractIntegrationTest {
         JestResult result = client.execute(new Health.Builder().build());
         assertTrue(result.getErrorMessage(), result.isSucceeded());
         assertThat(
-                result.getJsonObject().get("status").getAsString(),
+                result.getJsonObject().get("status").asText(),
                 anyOf(equalTo("green"), equalTo("yellow"), equalTo("red"))
         );
     }
@@ -34,7 +34,7 @@ public class HealthIntegrationTest extends AbstractIntegrationTest {
         JestResult result = client.execute(request);
         assertTrue(result.getErrorMessage(), result.isSucceeded());
         assertThat(
-                result.getJsonObject().get("status").getAsString(),
+                result.getJsonObject().get("status").asText(),
                 anyOf(equalTo("green"), equalTo("yellow"), equalTo("red"))
         );
     }
@@ -46,7 +46,7 @@ public class HealthIntegrationTest extends AbstractIntegrationTest {
                 .build();
         JestResult result = client.execute(request);
         assertTrue(result.getErrorMessage(), result.isSucceeded());
-        assertEquals("green", result.getJsonObject().get("status").getAsString());
+        assertEquals("green", result.getJsonObject().get("status").asText());
     }
 
     @Test
@@ -68,7 +68,7 @@ public class HealthIntegrationTest extends AbstractIntegrationTest {
         JestResult result = client.execute(request);
         assertTrue(result.getErrorMessage(), result.isSucceeded());
         assertThat(
-                result.getJsonObject().get("status").getAsString(),
+                result.getJsonObject().get("status").asText(),
                 anyOf(equalTo("green"), equalTo("yellow"), equalTo("red"))
         );
     }
@@ -81,7 +81,7 @@ public class HealthIntegrationTest extends AbstractIntegrationTest {
         JestResult result = client.execute(request);
         assertTrue(result.getErrorMessage(), result.isSucceeded());
         assertThat(
-                result.getJsonObject().get("status").getAsString(),
+                result.getJsonObject().get("status").asText(),
                 anyOf(equalTo("green"), equalTo("yellow"), equalTo("red"))
         );
     }
@@ -94,7 +94,7 @@ public class HealthIntegrationTest extends AbstractIntegrationTest {
         JestResult result = client.execute(request);
         assertTrue(result.getErrorMessage(), result.isSucceeded());
         assertThat(
-                result.getJsonObject().get("status").getAsString(),
+                result.getJsonObject().get("status").asText(),
                 anyOf(equalTo("green"), equalTo("yellow"), equalTo("red"))
         );
     }

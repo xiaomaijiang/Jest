@@ -2,13 +2,15 @@ package io.searchbox.indices.settings;
 
 import org.junit.Test;
 
+import java.io.IOException;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
 public class UpdateSettingsTest {
 
     @Test
-    public void testDefaultBehaviour() {
+    public void testDefaultBehaviour() throws IOException {
         String expectedUri = "_all/_settings";
 
         UpdateSettings updateSettings = new UpdateSettings.Builder("").build();

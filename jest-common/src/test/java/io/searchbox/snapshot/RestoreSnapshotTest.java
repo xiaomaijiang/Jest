@@ -1,8 +1,10 @@
 package io.searchbox.snapshot;
 
-import com.google.gson.Gson;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.elasticsearch.common.settings.Settings;
 import org.junit.Test;
+
+import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
 
@@ -15,7 +17,7 @@ public class RestoreSnapshotTest {
     private String snapshot = "leeseola";
 
     @Test
-    public void testSnapshot() {
+    public void testSnapshot() throws IOException {
         final Settings.Builder registerRepositorySettings = Settings.settingsBuilder();
         registerRepositorySettings.put("indices", "index_1,index_2");
         registerRepositorySettings.put("ignore_unavailable", "true");
@@ -27,7 +29,8 @@ public class RestoreSnapshotTest {
                 .settings(registerRepositorySettings.build().getAsMap()).build();
         assertEquals("POST", restoreSnapshot.getRestMethodName());
         assertEquals("/_snapshot/leeseohoo/leeseola/_restore", restoreSnapshot.getURI());
-        String settings = new Gson().toJson(restoreSnapshot.getData(new Gson()));
+        final ObjectMapper objectMapper = new ObjectMapper();
+        String settings = objectMapper.writeValueAsString(restoreSnapshot.getData(objectMapper));
         assertEquals("\"{\\\"ignore_unavailable\\\":\\\"true\\\",\\\"include_global_state\\\":\\\"false\\\",\\\"indices\\\":\\\"index_1,index_2\\\",\\\"rename_pattern\\\":\\\"index_(.+)\\\",\\\"rename_replacement\\\":\\\"restored_index_$1\\\"}\"", settings);
     }
 }

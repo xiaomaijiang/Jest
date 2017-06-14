@@ -1,10 +1,9 @@
 package io.searchbox.core;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.google.common.collect.Lists;
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import io.searchbox.client.JestResult;
 
 import java.util.List;
@@ -19,8 +18,8 @@ public class CatResult extends JestResult {
         super(catResult);
     }
 
-    public CatResult(Gson gson) {
-        super(gson);
+    public CatResult(ObjectMapper objectMapper) {
+        super(objectMapper);
     }
 
     /**
@@ -28,10 +27,10 @@ public class CatResult extends JestResult {
      * @return empty array if response is not present, otherwise column names as first row plus one additional row per single result
      */
     public String[][] getPlainText() {
-        JsonObject jsonObject = getJsonObject();
-        if(jsonObject != null && jsonObject.has(getPathToResult()) && jsonObject.get(getPathToResult()).isJsonArray()) {
-            JsonArray esResultRows = jsonObject.get(getPathToResult()).getAsJsonArray();
-            if(esResultRows.size() > 0 && esResultRows.get(0).isJsonObject()) {
+        final JsonNode jsonObject = getJsonObject();
+        if(jsonObject != null && jsonObject.has(getPathToResult()) && jsonObject.get(getPathToResult()).isArray()) {
+            ArrayNode esResultRows = (ArrayNode) jsonObject.get(getPathToResult());
+            if(esResultRows.size() > 0 && esResultRows.get(0).isObject()) {
                 return parseResultArray(esResultRows);
             }
         }
@@ -39,18 +38,18 @@ public class CatResult extends JestResult {
         return new String[0][0];
     }
 
-    private String[][] parseResultArray(JsonArray esResponse) {
-        List<Map.Entry<String, JsonElement>> fieldsInFirstResponseRow = Lists.newArrayList(esResponse.get(0).getAsJsonObject().entrySet());
+    private String[][] parseResultArray(ArrayNode esResponse) {
+        final JsonNode jsonNode = esResponse.get(0);
+        List<Map.Entry<String, JsonNode>> fieldsInFirstResponseRow = Lists.newArrayList(jsonNode.fields());
         String[][] result = new String[esResponse.size() + 1][fieldsInFirstResponseRow.size()];
         for(int i = 0; i < fieldsInFirstResponseRow.size(); i++) {
             result[0][i] = fieldsInFirstResponseRow.get(i).getKey();
         }
 
         int rowNum = 1;
-        for(JsonElement row: esResponse) {
-            JsonObject currentObj = row.getAsJsonObject();
+        for(JsonNode row: esResponse) {
             for (int colId = 0; colId < fieldsInFirstResponseRow.size(); colId++) {
-                result[rowNum][colId] = currentObj.get(result[0][colId]).getAsString();
+                result[rowNum][colId] = row.get(result[0][colId]).asText();
             }
 
             rowNum++;

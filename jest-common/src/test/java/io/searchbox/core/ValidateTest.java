@@ -2,6 +2,8 @@ package io.searchbox.core;
 
 import org.junit.Test;
 
+import java.io.IOException;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
@@ -13,7 +15,7 @@ import static org.junit.Assert.assertNotEquals;
 public class ValidateTest {
 
     @Test
-    public void validateQuery() {
+    public void validateQuery() throws IOException {
         Validate validate = new Validate.Builder("{query:query}").build();
 
         assertEquals("POST", validate.getRestMethodName());
@@ -22,7 +24,7 @@ public class ValidateTest {
     }
 
     @Test
-    public void validateQueryWithIndex() {
+    public void validateQueryWithIndex() throws IOException {
         Validate validate = new Validate.Builder("{query:query}").index("twitter").build();
 
         assertEquals("POST", validate.getRestMethodName());
@@ -31,7 +33,7 @@ public class ValidateTest {
     }
 
     @Test
-    public void validateQueryWithIndexAndType() {
+    public void validateQueryWithIndexAndType() throws IOException {
         Validate validate = new Validate.Builder("{query:query}").index("twitter").type("tweet").build();
 
         assertEquals("POST", validate.getRestMethodName());

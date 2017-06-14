@@ -1,7 +1,9 @@
 package io.searchbox.core;
 
-import com.google.gson.Gson;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
+
+import java.io.IOException;
 
 import static org.junit.Assert.assertArrayEquals;
 
@@ -32,15 +34,15 @@ public class CatResultTest {
 
     @Test
     public void shouldReturnEmptyArrayOnNoJsonObject() {
-        CatResult catResult = new CatResult(new Gson());
+        CatResult catResult = new CatResult(new ObjectMapper());
         assertArrayEquals(new String[0][0], catResult.getPlainText());
     }
 
     @Test
-      public void shouldReturnArrayWithColumnNamesAndSingleResult() {
+      public void shouldReturnArrayWithColumnNamesAndSingleResult() throws IOException {
         Cat cat = new Cat.IndicesBuilder().build();
         String reasonPhase = "";
-        CatResult catResult = cat.createNewElasticSearchResult(EXAMPLE_RESPONSE_SINGLE_ROWS, 200, reasonPhase, new Gson());
+        CatResult catResult = cat.createNewElasticSearchResult(EXAMPLE_RESPONSE_SINGLE_ROWS, 200, reasonPhase, new ObjectMapper());
 
         assertArrayEquals(new String[][]{
                 new String[]{"alias", "index", "filter"},
@@ -49,10 +51,10 @@ public class CatResultTest {
     }
 
     @Test
-    public void shouldReturnArrayWithTwoResultsEventWhenColumnsWereReordered() {
+    public void shouldReturnArrayWithTwoResultsEventWhenColumnsWereReordered() throws IOException {
         Cat cat = new Cat.IndicesBuilder().build();
         String reasonPhase = "";
-        CatResult catResult = cat.createNewElasticSearchResult(EXAMPLE_RESPONSE_TWO_ROWS, 200, reasonPhase, new Gson());
+        CatResult catResult = cat.createNewElasticSearchResult(EXAMPLE_RESPONSE_TWO_ROWS, 200, reasonPhase, new ObjectMapper());
 
         assertArrayEquals(new String[][]{
                 new String[]{"alias", "index", "filter"},

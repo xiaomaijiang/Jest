@@ -1,14 +1,16 @@
 package io.searchbox.core.search.aggregation;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import com.fasterxml.jackson.databind.JsonNode;
 
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
-import static io.searchbox.core.search.aggregation.AggregationField.*;
+import static io.searchbox.core.search.aggregation.AggregationField.BG_COUNT;
+import static io.searchbox.core.search.aggregation.AggregationField.BUCKETS;
+import static io.searchbox.core.search.aggregation.AggregationField.DOC_COUNT;
+import static io.searchbox.core.search.aggregation.AggregationField.KEY;
+import static io.searchbox.core.search.aggregation.AggregationField.SCORE;
 
 /**
  * @author cfstout
@@ -20,26 +22,25 @@ public class SignificantTermsAggregation extends BucketAggregation {
     private Long totalCount;
     private List<SignificantTerm> significantTerms = new LinkedList<SignificantTerm>();
 
-    public SignificantTermsAggregation(String name, JsonObject significantTermsAggregation) {
+    public SignificantTermsAggregation(String name, JsonNode significantTermsAggregation) {
         super(name, significantTermsAggregation);
 
-        if (significantTermsAggregation.has(String.valueOf(BUCKETS)) && significantTermsAggregation.get(String.valueOf(BUCKETS)).isJsonArray()) {
-            parseBuckets(significantTermsAggregation.get(String.valueOf(BUCKETS)).getAsJsonArray());
+        if (significantTermsAggregation.has(String.valueOf(BUCKETS)) && significantTermsAggregation.get(String.valueOf(BUCKETS)).isArray()) {
+            parseBuckets(significantTermsAggregation.get(String.valueOf(BUCKETS)));
         }
         if (significantTermsAggregation.has(String.valueOf(DOC_COUNT))) {
-            totalCount = significantTermsAggregation.get(String.valueOf(DOC_COUNT)).getAsLong();
+            totalCount = significantTermsAggregation.get(String.valueOf(DOC_COUNT)).asLong();
         }
     }
 
-    private void parseBuckets(JsonArray bucketsSource) {
-        for (JsonElement bucketv : bucketsSource) {
-            JsonObject bucket = bucketv.getAsJsonObject();
+    private void parseBuckets(JsonNode bucketsSource) {
+        for (JsonNode bucket : bucketsSource) {
             SignificantTerm term = new SignificantTerm(
                     bucket,
-                    bucket.get(String.valueOf(KEY)).getAsString(),
-                    bucket.get(String.valueOf(DOC_COUNT)).getAsLong(),
-                    bucket.get(String.valueOf(SCORE)).getAsDouble(),
-                    bucket.get(String.valueOf(BG_COUNT)).getAsLong()
+                    bucket.get(String.valueOf(KEY)).asText(),
+                    bucket.get(String.valueOf(DOC_COUNT)).asLong(),
+                    bucket.get(String.valueOf(SCORE)).asDouble(),
+                    bucket.get(String.valueOf(BG_COUNT)).asLong()
             );
             significantTerms.add(term);
         }
@@ -61,7 +62,7 @@ public class SignificantTermsAggregation extends BucketAggregation {
         private Double score;
         private Long backgroundCount;
 
-        public SignificantTerm(JsonObject bucket, String key, Long count, Double score, Long backgroundCount) {
+        public SignificantTerm(JsonNode bucket, String key, Long count, Double score, Long backgroundCount) {
             super(bucket, count);
             this.key = key;
             this.score = score;

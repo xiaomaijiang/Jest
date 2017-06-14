@@ -1,14 +1,14 @@
 package io.searchbox.core.search.aggregation;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import com.fasterxml.jackson.databind.JsonNode;
 
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
-import static io.searchbox.core.search.aggregation.AggregationField.*;
+import static io.searchbox.core.search.aggregation.AggregationField.BUCKETS;
+import static io.searchbox.core.search.aggregation.AggregationField.DOC_COUNT;
+import static io.searchbox.core.search.aggregation.AggregationField.KEY;
 
 /**
  * @author cfstout
@@ -19,20 +19,19 @@ public class GeoHashGridAggregation extends BucketAggregation{
 
     private List<GeoHashGrid> geoHashGrids = new LinkedList<GeoHashGrid>();
 
-    public GeoHashGridAggregation(String name, JsonObject geohashGridAggregation) {
+    public GeoHashGridAggregation(String name, JsonNode geohashGridAggregation) {
         super(name, geohashGridAggregation);
-        if(geohashGridAggregation.has(String.valueOf(BUCKETS)) && geohashGridAggregation.get(String.valueOf(BUCKETS)).isJsonArray()) {
-            parseBuckets(geohashGridAggregation.get(String.valueOf(BUCKETS)).getAsJsonArray());
+        if(geohashGridAggregation.has(String.valueOf(BUCKETS)) && geohashGridAggregation.get(String.valueOf(BUCKETS)).isArray()) {
+            parseBuckets(geohashGridAggregation.get(String.valueOf(BUCKETS)));
         }
     }
 
-    private void parseBuckets(JsonArray bucketsSource) {
-        for (JsonElement bucketElement : bucketsSource) {
-            JsonObject bucket = bucketElement.getAsJsonObject();
+    private void parseBuckets(JsonNode bucketsSource) {
+        for (JsonNode bucket : bucketsSource) {
             GeoHashGrid geoHashGrid = new GeoHashGrid(
                     bucket,
-                    bucket.get(String.valueOf(KEY)).getAsString(),
-                    bucket.get(String.valueOf(DOC_COUNT)).getAsLong());
+                    bucket.get(String.valueOf(KEY)).asText(),
+                    bucket.get(String.valueOf(DOC_COUNT)).asLong());
             geoHashGrids.add(geoHashGrid);
         }
     }
@@ -44,7 +43,7 @@ public class GeoHashGridAggregation extends BucketAggregation{
     public static class GeoHashGrid extends Bucket {
         private String key;
 
-        public GeoHashGrid(JsonObject bucket, String key, Long count) {
+        public GeoHashGrid(JsonNode bucket, String key, Long count) {
             super(bucket, count);
             this.key = key;
         }

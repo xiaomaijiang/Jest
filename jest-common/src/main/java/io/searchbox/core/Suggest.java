@@ -1,8 +1,10 @@
 package io.searchbox.core;
 
-import com.google.gson.Gson;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.searchbox.action.AbstractAction;
 import io.searchbox.action.AbstractMultiTypeActionBuilder;
+
+import java.io.IOException;
 
 public class Suggest extends AbstractAction<SuggestResult> {
 
@@ -14,8 +16,8 @@ public class Suggest extends AbstractAction<SuggestResult> {
     }
 
     @Override
-    public SuggestResult createNewElasticSearchResult(final String json, final int statusCode, final String reasonPhrase, final Gson gson) {
-        return this.createNewElasticSearchResult(new SuggestResult(gson), json, statusCode, reasonPhrase, gson);
+    public SuggestResult createNewElasticSearchResult(final String json, final int statusCode, final String reasonPhrase, final ObjectMapper objectMapper) throws IOException {
+        return this.createNewElasticSearchResult(new SuggestResult(objectMapper), json, statusCode, reasonPhrase, objectMapper);
     }
 
     @Override

@@ -1,7 +1,10 @@
 package io.searchbox.core.search.sort;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.BooleanNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.TextNode;
 
 /**
  * @author Riccardo Tasso
@@ -39,20 +42,20 @@ public class Sort {
         this.unmapped = true;
     }
 
-    public JsonObject toJsonObject() {
-        JsonObject sortDefinition = new JsonObject();
+    public JsonNode toJsonObject(ObjectMapper objectMapper) {
+        final ObjectNode sortDefinition = objectMapper.createObjectNode();
         if (order != null) {
-            sortDefinition.add("order", new JsonPrimitive(order.toString()));
+            sortDefinition.set("order", new TextNode(order.toString()));
         }
         if (missing != null) {
-            sortDefinition.add("missing", new JsonPrimitive(missing.toString()));
+            sortDefinition.set("missing", new TextNode(missing.toString()));
         }
         if (unmapped != null) {
-            sortDefinition.add("ignore_unmapped", new JsonPrimitive(unmapped));
+            sortDefinition.set("ignore_unmapped", BooleanNode.valueOf(unmapped));
         }
 
-        JsonObject sortObject = new JsonObject();
-        sortObject.add(field, sortDefinition);
+        final ObjectNode sortObject = objectMapper.createObjectNode();
+        sortObject.set(field, sortDefinition);
 
         return sortObject;
     }

@@ -2,6 +2,7 @@ package io.searchbox.indices;
 
 import io.searchbox.action.GenericResultAbstractAction;
 
+import java.util.Collections;
 import java.util.Objects;
 
 /**
@@ -17,7 +18,7 @@ public class CreateIndex extends GenericResultAbstractAction {
         if (builder.settings != null) {
             this.payload = builder.settings;
         } else {
-            this.payload = new Object();
+            this.payload = Collections.emptyMap();
         }
         setURI(buildURI());
     }

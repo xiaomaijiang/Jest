@@ -1,8 +1,11 @@
 package io.searchbox.core;
 
-import java.io.IOException;
-import java.util.List;
-
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.searchbox.client.JestResult;
+import io.searchbox.common.AbstractIntegrationTest;
+import io.searchbox.params.Parameters;
+import io.searchbox.params.SearchType;
 import org.apache.lucene.search.Explanation;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
@@ -10,14 +13,9 @@ import org.elasticsearch.test.ESIntegTestCase;
 import org.junit.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-
-import io.searchbox.client.JestResult;
-import io.searchbox.common.AbstractIntegrationTest;
-import io.searchbox.params.Parameters;
-import io.searchbox.params.SearchType;
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Dogukan Sonmez
@@ -142,10 +140,10 @@ public class SearchIntegrationTest extends AbstractIntegrationTest {
         );
         assertTrue(result.getErrorMessage(), result.isSucceeded());
 
-        JsonArray hits = result.getJsonObject().getAsJsonObject("hits").getAsJsonArray("hits");
+        JsonNode hits = result.getJsonObject().path("hits").path("hits");
         assertEquals(1, hits.size());
 
-        JsonElement explanation = hits.get(0).getAsJsonObject().get("_explanation");
+        JsonNode explanation = hits.get(0).get("_explanation");
         assertNotNull(explanation);
         logger.info("Explanation = {}", explanation);
 
@@ -187,7 +185,7 @@ public class SearchIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     public void searchAndGetFirstHit() throws IOException {
-        assertTrue(index("articles", "article", "3", new Gson().toJson(new TestArticleModel("pickles"))).isCreated());
+        assertTrue(index("articles", "article", "3", new ObjectMapper().writeValueAsString(new TestArticleModel("pickles"))).isCreated());
         refresh();
         ensureSearchable("articles");
 
@@ -206,7 +204,7 @@ public class SearchIntegrationTest extends AbstractIntegrationTest {
                 "}").build());
         assertNotNull(searchResult);
 
-        SearchResult.Hit<TestArticleModel, Explanation> hit = searchResult.getFirstHit(TestArticleModel.class, Explanation.class);
+        SearchResult.Hit<TestArticleModel, Map> hit = searchResult.getFirstHit(TestArticleModel.class, Map.class);
         assertNotNull(hit.source);
         assertNotNull(hit.explanation);
         assertNotNull(hit.highlight);

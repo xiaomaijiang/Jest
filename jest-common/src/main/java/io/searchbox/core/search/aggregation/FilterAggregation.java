@@ -1,6 +1,6 @@
 package io.searchbox.core.search.aggregation;
 
-import com.google.gson.JsonObject;
+import com.fasterxml.jackson.databind.JsonNode;
 
 import java.util.Objects;
 
@@ -13,8 +13,8 @@ public class FilterAggregation extends Bucket {
 
     public static final String TYPE = "filter";
 
-    public FilterAggregation(String name, JsonObject filterAggregation) {
-        super(name, filterAggregation, filterAggregation.get(String.valueOf(DOC_COUNT)).getAsLong());
+    public FilterAggregation(String name, JsonNode filterAggregation) {
+        super(name, filterAggregation, filterAggregation.get(String.valueOf(DOC_COUNT)).asLong());
     }
 
     @Override

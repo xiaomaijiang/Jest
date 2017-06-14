@@ -1,13 +1,13 @@
 package io.searchbox.indices.aliases;
 
-import java.util.Map;
-
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.elasticsearch.common.collect.MapBuilder;
 import org.json.JSONException;
 import org.junit.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 
-import com.google.gson.Gson;
+import java.util.Map;
 
 /**
  * @author cihat keser
@@ -20,37 +20,39 @@ public class AddAliasMappingTest {
                     .immutableMap())
             .immutableMap();
 
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
     @Test
-    public void testBasicGetDataForJson() throws JSONException {
+    public void testBasicGetDataForJson() throws JSONException, JsonProcessingException {
         AddAliasMapping addAliasMapping = new AddAliasMapping
                 .Builder("tIndex", "tAlias")
                 .build();
-        String actualJson = new Gson().toJson(addAliasMapping.getData());
+        String actualJson = objectMapper.writeValueAsString(addAliasMapping.getData());
         String expectedJson = "[{\"add\":{\"index\":\"tIndex\",\"alias\":\"tAlias\"}}]";
 
         JSONAssert.assertEquals(expectedJson, actualJson, false);
     }
 
     @Test
-    public void testGetDataForJsonWithFilter() throws JSONException {
+    public void testGetDataForJsonWithFilter() throws JSONException, JsonProcessingException {
         AddAliasMapping addAliasMapping = new AddAliasMapping
                 .Builder("tIndex", "tAlias")
                 .setFilter(USER_FILTER_JSON)
                 .build();
-        String actualJson = new Gson().toJson(addAliasMapping.getData());
+        String actualJson = objectMapper.writeValueAsString(addAliasMapping.getData());
         String expectedJson = "[{\"add\":{\"index\":\"tIndex\",\"alias\":\"tAlias\",\"filter\":{\"term\":{\"user\":\"kimchy\"}}}}]";
 
         JSONAssert.assertEquals(expectedJson, actualJson, false);
     }
 
     @Test
-    public void testGetDataForJsonWithFilterAndRouting() throws JSONException {
+    public void testGetDataForJsonWithFilterAndRouting() throws JSONException, JsonProcessingException {
         AddAliasMapping addAliasMapping = new AddAliasMapping
                 .Builder("tIndex", "tAlias")
                 .setFilter(USER_FILTER_JSON)
                 .addRouting("1")
                 .build();
-        String actualJson = new Gson().toJson(addAliasMapping.getData());
+        String actualJson = objectMapper.writeValueAsString(addAliasMapping.getData());
         String expectedJson = "[{\"add\":{\"index\":\"tIndex\",\"alias\":\"tAlias\"," +
                 "\"filter\":{\"term\":{\"user\":\"kimchy\"}},\"search_routing\":\"1\",\"index_routing\":\"1\"}}]";
 

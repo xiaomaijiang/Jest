@@ -1,15 +1,20 @@
 package io.searchbox.core;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonParser;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.json.JSONException;
 import org.junit.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Map;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Dogukan Sonmez
@@ -17,7 +22,7 @@ import static org.junit.Assert.*;
 public class MultiSearchTest {
 
     @Test
-    public void singleMultiSearchWithoutIndex() throws JSONException {
+    public void singleMultiSearchWithoutIndex() throws JSONException, IOException {
         String expectedData = " {\"index\" : \"_all\"}\n" +
                 "{\"query\" : {\"match_all\" : {}}}\n";
         Search search = new Search.Builder("{\"query\" : {\"match_all\" : {}}}").build();
@@ -26,11 +31,11 @@ public class MultiSearchTest {
 
         assertEquals("POST", multiSearch.getRestMethodName());
         assertEquals("/_msearch", multiSearch.getURI());
-        JSONAssert.assertEquals(expectedData, multiSearch.getData(null).toString(), false);
+        JSONAssert.assertEquals(expectedData, multiSearch.getData(null), false);
     }
 
     @Test
-    public void singleMultiSearchWitIndex() throws JSONException {
+    public void singleMultiSearchWitIndex() throws JSONException, IOException {
         String expectedData = " {\"index\" : \"twitter\"}\n" +
                 "{\"query\" : {\"match_all\" : {}}}\n";
         Search search = new Search.Builder("{\"query\" : {\"match_all\" : {}}}")
@@ -41,11 +46,11 @@ public class MultiSearchTest {
 
         assertEquals("POST", multiSearch.getRestMethodName());
         assertEquals("/_msearch", multiSearch.getURI());
-        JSONAssert.assertEquals(expectedData, multiSearch.getData(null).toString(), false);
+        JSONAssert.assertEquals(expectedData, multiSearch.getData(null), false);
     }
 
     @Test
-    public void multiSearchWitIndex() throws JSONException {
+    public void multiSearchWitIndex() throws JSONException, IOException {
         String expectedData = " {\"index\" : \"twitter\"}\n" +
                 "{\"query\" : {\"match_all\" : {}}}\n" +
                 "{\"index\" : \"_all\"}\n" +
@@ -59,7 +64,7 @@ public class MultiSearchTest {
 
         assertEquals("POST", multiSearch.getRestMethodName());
         assertEquals("/_msearch", multiSearch.getURI());
-        JSONAssert.assertEquals(expectedData, multiSearch.getData(null).toString(), false);
+        JSONAssert.assertEquals(expectedData, multiSearch.getData(null), false);
     }
 
     @Test
@@ -89,7 +94,7 @@ public class MultiSearchTest {
     }
 
     @Test
-    public void multiSearchResponse() {
+    public void multiSearchResponse() throws IOException {
         String json = "{\n" +
                 "   \"responses\": [\n" +
                 "      {\n" +
@@ -134,10 +139,11 @@ public class MultiSearchTest {
                 "   ]\n" +
                 "}";
 
-        MultiSearchResult multiSearchResult = new MultiSearchResult(new Gson());
+        final ObjectMapper objectMapper = new ObjectMapper();
+        MultiSearchResult multiSearchResult = new MultiSearchResult(objectMapper);
         multiSearchResult.setSucceeded(true);
         multiSearchResult.setJsonString(json);
-        multiSearchResult.setJsonObject(new JsonParser().parse(json).getAsJsonObject());
+        multiSearchResult.setJsonObject(objectMapper.readTree(json));
 
         assertNotNull(multiSearchResult.getResponses());
         assertEquals(3, multiSearchResult.getResponses().size());

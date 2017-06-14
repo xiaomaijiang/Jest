@@ -1,15 +1,19 @@
 package io.searchbox.core;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.collect.Sets;
 import io.searchbox.client.JestResult;
-import io.searchbox.cloning.CloneUtils;
 import io.searchbox.core.search.aggregation.MetricAggregation;
 import io.searchbox.core.search.aggregation.RootAggregation;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 
 /**
  * @author cihat keser
@@ -26,8 +30,8 @@ public class SearchResult extends JestResult {
         super(searchResult);
     }
 
-    public SearchResult(Gson gson) {
-        super(gson);
+    public SearchResult(ObjectMapper objectMapper) {
+        super(objectMapper);
     }
 
     @Override
@@ -80,15 +84,15 @@ public class SearchResult extends JestResult {
             String[] keys = getKeys();
             if (keys != null) { // keys would never be null in a standard search scenario (i.e.: unless search class is overwritten)
                 String sourceKey = keys[keys.length - 1];
-                JsonElement obj = jsonObject.get(keys[0]);
+                JsonNode obj = jsonObject.get(keys[0]);
                 for (int i = 1; i < keys.length - 1; i++) {
-                    obj = ((JsonObject) obj).get(keys[i]);
+                    obj = obj.get(keys[i]);
                 }
 
-                if (obj.isJsonObject()) {
+                if (obj.isObject()) {
                     sourceList.add(extractHit(sourceType, explanationType, obj, sourceKey, addEsMetadataFields));
-                } else if (obj.isJsonArray()) {
-                    for (JsonElement hitElement : obj.getAsJsonArray()) {
+                } else if (obj.isArray()) {
+                    for (JsonNode hitElement : obj) {
                         sourceList.add(extractHit(sourceType, explanationType, hitElement, sourceKey, addEsMetadataFields));
                         if (returnSingle) break;
                     }
@@ -99,37 +103,37 @@ public class SearchResult extends JestResult {
         return sourceList;
     }
 
-    protected <T, K> Hit<T, K> extractHit(Class<T> sourceType, Class<K> explanationType, JsonElement hitElement, String sourceKey, boolean addEsMetadataFields) {
+    protected <T, K> Hit<T, K> extractHit(Class<T> sourceType, Class<K> explanationType, JsonNode hitElement, String sourceKey, boolean addEsMetadataFields) {
         Hit<T, K> hit = null;
 
-        if (hitElement.isJsonObject()) {
-            JsonObject hitObject = hitElement.getAsJsonObject();
-            JsonObject source = hitObject.getAsJsonObject(sourceKey);
+        if (hitElement.isObject()) {
+            ObjectNode hitObject = (ObjectNode) hitElement;
+            ObjectNode source = (ObjectNode) hitObject.get(sourceKey);
 
             if (source != null) {
-                String index = hitObject.get("_index").getAsString();
-                String type = hitObject.get("_type").getAsString();
+                String index = hitObject.get("_index").asText();
+                String type = hitObject.get("_type").asText();
 
-                String id = hitObject.get("_id").getAsString();
+                String id = hitObject.get("_id").asText();
 
                 Double score = null;
-                if (hitObject.has("_score") && !hitObject.get("_score").isJsonNull()) {
-                    score = hitObject.get("_score").getAsDouble();
+                if (hitObject.has("_score") && !hitObject.get("_score").isNull()) {
+                    score = hitObject.get("_score").asDouble();
                 }
 
-                JsonElement explanation = hitObject.get(EXPLANATION_KEY);
-                Map<String, List<String>> highlight = extractHighlight(hitObject.getAsJsonObject(HIGHLIGHT_KEY));
-                List<String> sort = extractSort(hitObject.getAsJsonArray(SORT_KEY));
+                JsonNode explanation = hitObject.get(EXPLANATION_KEY);
+                Map<String, List<String>> highlight = extractHighlight((ObjectNode) hitObject.get(HIGHLIGHT_KEY));
+                List<String> sort = extractSort(hitObject.get(SORT_KEY));
 
                 if (addEsMetadataFields) {
-                    JsonObject clonedSource = null;
+                    ObjectNode clonedSource = null;
                     for (MetaField metaField : META_FIELDS) {
-                        JsonElement metaElement = hitObject.get(metaField.esFieldName);
+                        JsonNode metaElement = hitObject.get(metaField.esFieldName);
                         if (metaElement != null) {
                             if (clonedSource == null) {
-                                clonedSource = (JsonObject) CloneUtils.deepClone(source);
+                                clonedSource = source.deepCopy();
                             }
-                            clonedSource.add(metaField.internalFieldName, metaElement);
+                            clonedSource.set(metaField.internalFieldName, metaElement);
                         }
                     }
                     if (clonedSource != null) {
@@ -155,29 +159,29 @@ public class SearchResult extends JestResult {
         return hit;
     }
 
-    protected List<String> extractSort(JsonArray sort) {
+    protected List<String> extractSort(JsonNode sort) {
         if (sort == null) {
             return null;
         }
 
         List<String> retval = new ArrayList<String>(sort.size());
-        for (JsonElement sortValue : sort) {
-            retval.add(sortValue.isJsonNull() ? "" : sortValue.getAsString());
+        for (JsonNode sortValue : sort) {
+            retval.add(sortValue.isNull() ? "" : sortValue.asText());
         }
         return retval;
     }
 
-    protected Map<String, List<String>> extractHighlight(JsonObject highlight) {
+    protected Map<String, List<String>> extractHighlight(ObjectNode highlight) {
         Map<String, List<String>> retval = null;
 
         if (highlight != null) {
-            Set<Map.Entry<String, JsonElement>> highlightSet = highlight.entrySet();
+            Set<Map.Entry<String, JsonNode>> highlightSet = Sets.newHashSet(highlight.fields());
             retval = new HashMap<String, List<String>>(highlightSet.size());
 
-            for (Map.Entry<String, JsonElement> entry : highlightSet) {
+            for (Map.Entry<String, JsonNode> entry : highlightSet) {
                 List<String> fragments = new ArrayList<String>();
-                for (JsonElement element : entry.getValue().getAsJsonArray()) {
-                    fragments.add(element.getAsString());
+                for (JsonNode element : entry.getValue()) {
+                    fragments.add(element.asText());
                 }
                 retval.put(entry.getKey(), fragments);
             }
@@ -188,25 +192,25 @@ public class SearchResult extends JestResult {
 
     public Integer getTotal() {
         Integer total = null;
-        JsonElement obj = getPath(PATH_TO_TOTAL);
-        if (obj != null) total = obj.getAsInt();
+        JsonNode obj = getPath(PATH_TO_TOTAL);
+        if (obj != null) total = obj.asInt();
         return total;
     }
 
     public Float getMaxScore() {
         Float maxScore = null;
-        JsonElement obj = getPath(PATH_TO_MAX_SCORE);
-        if (obj != null) maxScore = obj.getAsFloat();
+        JsonNode obj = getPath(PATH_TO_MAX_SCORE);
+        if (obj != null) maxScore = obj.floatValue();
         return maxScore;
     }
 
-    protected JsonElement getPath(String[] path) {
-        JsonElement retval = null;
+    protected JsonNode getPath(String[] path) {
+        JsonNode retval = null;
         if (jsonObject != null) {
-            JsonElement obj = jsonObject;
+            JsonNode obj = jsonObject;
             for (String component : path) {
                 if (obj == null) break;
-                obj = ((JsonObject) obj).get(component);
+                obj = ((ObjectNode) obj).get(component);
             }
             retval = obj;
         }
@@ -215,12 +219,12 @@ public class SearchResult extends JestResult {
 
     public MetricAggregation getAggregations() {
         final String rootAggrgationName = "aggs";
-        if (jsonObject == null) return new RootAggregation(rootAggrgationName, new JsonObject());
+        if (jsonObject == null) return new RootAggregation(rootAggrgationName, objectMapper.createObjectNode());
         if (jsonObject.has("aggregations"))
-            return new RootAggregation(rootAggrgationName, jsonObject.getAsJsonObject("aggregations"));
-        if (jsonObject.has("aggs")) return new RootAggregation(rootAggrgationName, jsonObject.getAsJsonObject("aggs"));
+            return new RootAggregation(rootAggrgationName, jsonObject.get("aggregations"));
+        if (jsonObject.has("aggs")) return new RootAggregation(rootAggrgationName, jsonObject.get("aggs"));
 
-        return new RootAggregation(rootAggrgationName, new JsonObject());
+        return new RootAggregation(rootAggrgationName, objectMapper.createObjectNode());
     }
 
     /**
@@ -241,20 +245,20 @@ public class SearchResult extends JestResult {
         public final String id;
         public final Double score;
 
-        public Hit(Class<T> sourceType, JsonElement source) {
+        public Hit(Class<T> sourceType, JsonNode source) {
             this(sourceType, source, null, null);
         }
 
-        public Hit(Class<T> sourceType, JsonElement source, Class<K> explanationType, JsonElement explanation) {
+        public Hit(Class<T> sourceType, JsonNode source, Class<K> explanationType, JsonNode explanation) {
             this(sourceType, source, explanationType, explanation, null, null);
         }
 
-        public Hit(Class<T> sourceType, JsonElement source, Class<K> explanationType, JsonElement explanation,
+        public Hit(Class<T> sourceType, JsonNode source, Class<K> explanationType, JsonNode explanation,
                    Map<String, List<String>> highlight, List<String> sort) {
             this(sourceType, source, explanationType, explanation, highlight, sort, null, null, null, null);
         }
 
-        public Hit(Class<T> sourceType, JsonElement source, Class<K> explanationType, JsonElement explanation,
+        public Hit(Class<T> sourceType, JsonNode source, Class<K> explanationType, JsonNode explanation,
                    Map<String, List<String>> highlight, List<String> sort, String index, String type, String id, Double score) {
             if (source == null) {
                 this.source = null;

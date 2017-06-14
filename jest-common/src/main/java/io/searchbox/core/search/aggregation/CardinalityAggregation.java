@@ -1,6 +1,6 @@
 package io.searchbox.core.search.aggregation;
 
-import com.google.gson.JsonObject;
+import com.fasterxml.jackson.databind.JsonNode;
 
 import java.util.Objects;
 
@@ -15,9 +15,9 @@ public class CardinalityAggregation extends MetricAggregation {
 
     private Long cardinality;
 
-    public CardinalityAggregation(String name, JsonObject cardinalityAggregation) {
+    public CardinalityAggregation(String name, JsonNode cardinalityAggregation) {
         super(name, cardinalityAggregation);
-        cardinality = cardinalityAggregation.get(String.valueOf(VALUE)).getAsLong();
+        cardinality = cardinalityAggregation.get(String.valueOf(VALUE)).asLong();
     }
 
     /**

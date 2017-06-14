@@ -46,6 +46,6 @@ public class PercolateIntegrationTest extends AbstractIntegrationTest {
         Percolate percolate = new Percolate.Builder(index, type, "{\"doc\" : {\"language\":\"java\"}}").build();
         result = client.execute(percolate);
         assertTrue(result.getErrorMessage(), result.isSucceeded());
-        assertEquals(1, result.getJsonObject().getAsJsonPrimitive("total").getAsInt());
+        assertEquals(1, result.getJsonObject().get("total").asInt());
     }
 }

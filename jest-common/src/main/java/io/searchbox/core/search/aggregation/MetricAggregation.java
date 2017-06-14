@@ -1,6 +1,6 @@
 package io.searchbox.core.search.aggregation;
 
-import com.google.gson.JsonObject;
+import com.fasterxml.jackson.databind.JsonNode;
 
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
@@ -12,7 +12,7 @@ import java.util.Map;
  */
 public abstract class MetricAggregation extends Aggregation {
 
-    public MetricAggregation(String name, JsonObject root) {
+    public MetricAggregation(String name, JsonNode root) {
         super(name, root);
     }
 
@@ -28,8 +28,8 @@ public abstract class MetricAggregation extends Aggregation {
             if (jsonRoot.has(nameCandidate)) {
                 try {
                     Class type = nameToTypeMap.get(nameCandidate);
-                    Constructor c = type.getConstructor(String.class, JsonObject.class);
-                    aggregations.add((Aggregation)c.newInstance(nameCandidate, jsonRoot.getAsJsonObject(nameCandidate)));
+                    Constructor c = type.getConstructor(String.class, JsonNode.class);
+                    aggregations.add((Aggregation)c.newInstance(nameCandidate, jsonRoot.get(nameCandidate)));
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
@@ -47,8 +47,8 @@ public abstract class MetricAggregation extends Aggregation {
     public <T extends Aggregation> T getAggregation(String aggName, Class<T> aggType) {
         if(jsonRoot.has(aggName)) {
             try {
-                Constructor<T> c = aggType.getConstructor(String.class, JsonObject.class);
-                return c.newInstance(aggName, jsonRoot.getAsJsonObject(aggName));
+                Constructor<T> c = aggType.getConstructor(String.class, JsonNode.class);
+                return c.newInstance(aggName, jsonRoot.get(aggName));
             } catch(Exception e) {
                 throw new RuntimeException(e);
             }
@@ -61,7 +61,7 @@ public abstract class MetricAggregation extends Aggregation {
      * @return a new AvgAggregation object if aggName is found within sub-aggregations of current aggregation level or null if not found
      */
     public AvgAggregation getAvgAggregation(String aggName) {
-        return jsonRoot.has(aggName) ? new AvgAggregation(aggName, jsonRoot.getAsJsonObject(aggName)) : null;
+        return jsonRoot.has(aggName) ? new AvgAggregation(aggName, jsonRoot.get(aggName)) : null;
     }
 
     /**
@@ -69,7 +69,7 @@ public abstract class MetricAggregation extends Aggregation {
      * @return a new CardinalityAggregation object if aggName is found within sub-aggregations of current aggregation level or null if not found
      */
     public CardinalityAggregation getCardinalityAggregation(String aggName) {
-        return jsonRoot.has(aggName) ? new CardinalityAggregation(aggName, jsonRoot.getAsJsonObject(aggName)) : null;
+        return jsonRoot.has(aggName) ? new CardinalityAggregation(aggName, jsonRoot.get(aggName)) : null;
     }
 
     /**
@@ -77,7 +77,7 @@ public abstract class MetricAggregation extends Aggregation {
      * @return a new DateHistogramAggregation object if aggName is found within sub-aggregations of current aggregation level or null if not found
      */
     public DateHistogramAggregation getDateHistogramAggregation(String aggName) {
-        return jsonRoot.has(aggName) ? new DateHistogramAggregation(aggName, jsonRoot.getAsJsonObject(aggName)) : null;
+        return jsonRoot.has(aggName) ? new DateHistogramAggregation(aggName, jsonRoot.get(aggName)) : null;
     }
 
     /**
@@ -85,7 +85,7 @@ public abstract class MetricAggregation extends Aggregation {
      * @return a new DateRangeAggregation object if aggName is found within sub-aggregations of current aggregation level or null if not found
      */
     public DateRangeAggregation getDateRangeAggregation(String aggName) {
-        return jsonRoot.has(aggName) ? new DateRangeAggregation(aggName, jsonRoot.getAsJsonObject(aggName)) : null;
+        return jsonRoot.has(aggName) ? new DateRangeAggregation(aggName, jsonRoot.get(aggName)) : null;
     }
 
     /**
@@ -93,7 +93,7 @@ public abstract class MetricAggregation extends Aggregation {
      * @return a new ExtendedStatsAggregation object if aggName is found within sub-aggregations of current aggregation level or null if not found
      */
     public ExtendedStatsAggregation getExtendedStatsAggregation(String aggName) {
-        return jsonRoot.has(aggName) ? new ExtendedStatsAggregation(aggName, jsonRoot.getAsJsonObject(aggName)) : null;
+        return jsonRoot.has(aggName) ? new ExtendedStatsAggregation(aggName, jsonRoot.get(aggName)) : null;
     }
 
     /**
@@ -101,7 +101,7 @@ public abstract class MetricAggregation extends Aggregation {
      * @return a new FilterAggregation object if aggName is found within sub-aggregations of current aggregation level or null if not found
      */
     public FilterAggregation getFilterAggregation(String aggName) {
-        return jsonRoot.has(aggName) ? new FilterAggregation(aggName, jsonRoot.getAsJsonObject(aggName)) : null;
+        return jsonRoot.has(aggName) ? new FilterAggregation(aggName, jsonRoot.get(aggName)) : null;
     }
 
     /**
@@ -109,7 +109,7 @@ public abstract class MetricAggregation extends Aggregation {
      * @return a new FiltersAggregation object if aggName is found within sub-aggregations of current aggregation level or null if not found
      */
     public FiltersAggregation getFiltersAggregation(String aggName) {
-        return jsonRoot.has(aggName) ? new FiltersAggregation(aggName, jsonRoot.getAsJsonObject(aggName)) : null;
+        return jsonRoot.has(aggName) ? new FiltersAggregation(aggName, jsonRoot.get(aggName)) : null;
     }
 
     /**
@@ -117,7 +117,7 @@ public abstract class MetricAggregation extends Aggregation {
      * @return a new GeoBoundsAggregation object if aggName is found within sub-aggregations of current aggregation level or null if not found
      */
     public GeoBoundsAggregation getGeoBoundsAggregation(String aggName) {
-        return jsonRoot.has(aggName) ? new GeoBoundsAggregation(aggName, jsonRoot.getAsJsonObject(aggName)) : null;
+        return jsonRoot.has(aggName) ? new GeoBoundsAggregation(aggName, jsonRoot.get(aggName)) : null;
     }
 
     /**
@@ -125,7 +125,7 @@ public abstract class MetricAggregation extends Aggregation {
      * @return a new GeoDistanceAggregation object if aggName is found within sub-aggregations of current aggregation level or null if not found
      */
     public GeoDistanceAggregation getGeoDistanceAggregation(String aggName) {
-        return jsonRoot.has(aggName) ? new GeoDistanceAggregation(aggName, jsonRoot.getAsJsonObject(aggName)) : null;
+        return jsonRoot.has(aggName) ? new GeoDistanceAggregation(aggName, jsonRoot.get(aggName)) : null;
     }
 
     /**
@@ -133,7 +133,7 @@ public abstract class MetricAggregation extends Aggregation {
      * @return a new GeohashGridAggregation object if aggName is found within sub-aggregations of current aggregation level or null if not found
      */
     public GeoHashGridAggregation getGeohashGridAggregation(String aggName) {
-        return jsonRoot.has(aggName) ? new GeoHashGridAggregation(aggName, jsonRoot.getAsJsonObject(aggName)) : null;
+        return jsonRoot.has(aggName) ? new GeoHashGridAggregation(aggName, jsonRoot.get(aggName)) : null;
     }
 
     /**
@@ -141,7 +141,7 @@ public abstract class MetricAggregation extends Aggregation {
      * @return a new HistogramAggregation object if aggName is found within sub-aggregations of current aggregation level or null if not found
      */
     public HistogramAggregation getHistogramAggregation(String aggName) {
-        return jsonRoot.has(aggName) ? new HistogramAggregation(aggName, jsonRoot.getAsJsonObject(aggName)) : null;
+        return jsonRoot.has(aggName) ? new HistogramAggregation(aggName, jsonRoot.get(aggName)) : null;
     }
 
     /**
@@ -149,7 +149,7 @@ public abstract class MetricAggregation extends Aggregation {
      * @return a new Ipv4RangeAggregation object if aggName is found within sub-aggregations of current aggregation level or null if not found
      */
     public Ipv4RangeAggregation getIpv4RangeAggregation(String aggName) {
-        return jsonRoot.has(aggName) ? new Ipv4RangeAggregation(aggName, jsonRoot.getAsJsonObject(aggName)) : null;
+        return jsonRoot.has(aggName) ? new Ipv4RangeAggregation(aggName, jsonRoot.get(aggName)) : null;
     }
 
     /**
@@ -157,7 +157,7 @@ public abstract class MetricAggregation extends Aggregation {
      * @return a new MaxAggregation object if aggName is found within sub-aggregations of current aggregation level or null if not found
      */
     public MaxAggregation getMaxAggregation(String aggName) {
-        return jsonRoot.has(aggName) ? new MaxAggregation(aggName, jsonRoot.getAsJsonObject(aggName)) : null;
+        return jsonRoot.has(aggName) ? new MaxAggregation(aggName, jsonRoot.get(aggName)) : null;
     }
 
     /**
@@ -165,7 +165,7 @@ public abstract class MetricAggregation extends Aggregation {
      * @return a new MinAggregation object if aggName is found within sub-aggregations of current aggregation level or null if not found
      */
     public MinAggregation getMinAggregation(String aggName) {
-        return jsonRoot.has(aggName) ? new MinAggregation(aggName, jsonRoot.getAsJsonObject(aggName)) : null;
+        return jsonRoot.has(aggName) ? new MinAggregation(aggName, jsonRoot.get(aggName)) : null;
     }
 
     /**
@@ -173,7 +173,7 @@ public abstract class MetricAggregation extends Aggregation {
      * @return a new MissingAggregation object if aggName is found within sub-aggregations of current aggregation level or null if not found
      */
     public MissingAggregation getMissingAggregation(String aggName) {
-        return jsonRoot.has(aggName) ? new MissingAggregation(aggName, jsonRoot.getAsJsonObject(aggName)) : null;
+        return jsonRoot.has(aggName) ? new MissingAggregation(aggName, jsonRoot.get(aggName)) : null;
     }
 
     /**
@@ -181,7 +181,7 @@ public abstract class MetricAggregation extends Aggregation {
      * @return a new PercentileRanksAggregation object if aggName is found within sub-aggregations of current aggregation level or null if not found
      */
     public PercentileRanksAggregation getPercentileRanksAggregation(String aggName) {
-        return jsonRoot.has(aggName) ? new PercentileRanksAggregation(aggName, jsonRoot.getAsJsonObject(aggName)) : null;
+        return jsonRoot.has(aggName) ? new PercentileRanksAggregation(aggName, jsonRoot.get(aggName)) : null;
     }
 
     /**
@@ -189,7 +189,7 @@ public abstract class MetricAggregation extends Aggregation {
      * @return a new PercentilesAggregation object if aggName is found within sub-aggregations of current aggregation level or null if not found
      */
     public PercentilesAggregation getPercentilesAggregation(String aggName) {
-        return jsonRoot.has(aggName) ? new PercentilesAggregation(aggName, jsonRoot.getAsJsonObject(aggName)) : null;
+        return jsonRoot.has(aggName) ? new PercentilesAggregation(aggName, jsonRoot.get(aggName)) : null;
     }
 
     /**
@@ -197,7 +197,7 @@ public abstract class MetricAggregation extends Aggregation {
      * @return a new RangeAggregation object if aggName is found within sub-aggregations of current aggregation level or null if not found
      */
     public RangeAggregation getRangeAggregation(String aggName) {
-        return jsonRoot.has(aggName) ? new RangeAggregation(aggName, jsonRoot.getAsJsonObject(aggName)) : null;
+        return jsonRoot.has(aggName) ? new RangeAggregation(aggName, jsonRoot.get(aggName)) : null;
     }
 
     /**
@@ -205,7 +205,7 @@ public abstract class MetricAggregation extends Aggregation {
      * @return a new ScriptedMetricAggregation object if aggName is found within sub-aggregations of current aggregation level or null if not found
      */
     public ScriptedMetricAggregation getScriptedMetricAggregation(String aggName) {
-        return jsonRoot.has(aggName) ? new ScriptedMetricAggregation(aggName, jsonRoot.getAsJsonObject(aggName)) : null;
+        return jsonRoot.has(aggName) ? new ScriptedMetricAggregation(aggName, jsonRoot.get(aggName)) : null;
     }
 
     /**
@@ -213,7 +213,7 @@ public abstract class MetricAggregation extends Aggregation {
      * @return a new SignificantTermsAggregation object if aggName is found within sub-aggregations of current aggregation level or null if not found
      */
     public SignificantTermsAggregation getSignificantTermsAggregation(String aggName) {
-        return jsonRoot.has(aggName) ? new SignificantTermsAggregation(aggName, jsonRoot.getAsJsonObject(aggName)) : null;
+        return jsonRoot.has(aggName) ? new SignificantTermsAggregation(aggName, jsonRoot.get(aggName)) : null;
     }
 
     /**
@@ -221,7 +221,7 @@ public abstract class MetricAggregation extends Aggregation {
      * @return a new StatsAggregation object if aggName is found within sub-aggregations of current aggregation level or null if not found
      */
     public StatsAggregation getStatsAggregation(String aggName) {
-        return jsonRoot.has(aggName) ? new StatsAggregation(aggName, jsonRoot.getAsJsonObject(aggName)) : null;
+        return jsonRoot.has(aggName) ? new StatsAggregation(aggName, jsonRoot.get(aggName)) : null;
     }
 
     /**
@@ -229,7 +229,7 @@ public abstract class MetricAggregation extends Aggregation {
      * @return a new SumAggregation object if aggName is found within sub-aggregations of current aggregation level or null if not found
      */
     public SumAggregation getSumAggregation(String aggName) {
-        return jsonRoot.has(aggName) ? new SumAggregation(aggName, jsonRoot.getAsJsonObject(aggName)) : null;
+        return jsonRoot.has(aggName) ? new SumAggregation(aggName, jsonRoot.get(aggName)) : null;
     }
 
     /**
@@ -237,7 +237,7 @@ public abstract class MetricAggregation extends Aggregation {
      * @return a new TermsAggregation object if aggName is found within sub-aggregations of current aggregation level or null if not found
      */
     public TermsAggregation getTermsAggregation(String aggName) {
-        return jsonRoot.has(aggName) ? new TermsAggregation(aggName, jsonRoot.getAsJsonObject(aggName)) : null;
+        return jsonRoot.has(aggName) ? new TermsAggregation(aggName, jsonRoot.get(aggName)) : null;
     }
 
     /**
@@ -245,11 +245,11 @@ public abstract class MetricAggregation extends Aggregation {
      * @return a new ValueCountAggregation object if aggName is found within sub-aggregations of current aggregation level or null if not found
      */
     public ValueCountAggregation getValueCountAggregation(String aggName) {
-        return jsonRoot.has(aggName) ? new ValueCountAggregation(aggName, jsonRoot.getAsJsonObject(aggName)) : null;
+        return jsonRoot.has(aggName) ? new ValueCountAggregation(aggName, jsonRoot.get(aggName)) : null;
     }
     
     public TopHitsAggregation getTopHitsAggregation(String aggName) {
-	return jsonRoot.has(aggName) ? new TopHitsAggregation(aggName, jsonRoot.getAsJsonObject(aggName)) : null;
+	return jsonRoot.has(aggName) ? new TopHitsAggregation(aggName, jsonRoot.get(aggName)) : null;
     }
 
 }

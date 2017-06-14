@@ -1,11 +1,12 @@
 package io.searchbox.core;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.searchbox.annotations.JestId;
 import io.searchbox.annotations.JestVersion;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -19,6 +20,8 @@ import static org.junit.Assert.assertTrue;
  * @author cihat keser
  */
 public class SearchResultTest {
+    private final ObjectMapper objectMapper = new ObjectMapper()
+            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 
     String json = "{\n" +
             "    \"_shards\":{\n" +
@@ -47,11 +50,11 @@ public class SearchResultTest {
             "}";
 
     @Test
-    public void testGetMaxScoreWhenMissing() {
-        SearchResult searchResult = new SearchResult(new Gson());
+    public void testGetMaxScoreWhenMissing() throws IOException {
+        SearchResult searchResult = new SearchResult(objectMapper);
         searchResult.setSucceeded(true);
         searchResult.setJsonString(json);
-        searchResult.setJsonObject(new JsonParser().parse(json).getAsJsonObject());
+        searchResult.setJsonObject(objectMapper.readTree(json));
         searchResult.setPathToResult("hits/hits/_source");
 
         Float maxScore = searchResult.getMaxScore();
@@ -59,7 +62,7 @@ public class SearchResultTest {
     }
 
     @Test
-    public void testGetMaxScore() {
+    public void testGetMaxScore() throws IOException {
         String jsonWithMaxScore = "{\n" +
                 "    \"_shards\":{\n" +
                 "        \"total\" : 5,\n" +
@@ -83,10 +86,10 @@ public class SearchResultTest {
                 "        ]\n" +
                 "    }\n" +
                 "}";
-        SearchResult searchResult = new SearchResult(new Gson());
+        SearchResult searchResult = new SearchResult(objectMapper);
         searchResult.setSucceeded(true);
         searchResult.setJsonString(jsonWithMaxScore);
-        searchResult.setJsonObject(new JsonParser().parse(jsonWithMaxScore).getAsJsonObject());
+        searchResult.setJsonObject(objectMapper.readTree(jsonWithMaxScore));
         searchResult.setPathToResult("hits/hits/_source");
 
         Float maxScore = searchResult.getMaxScore();
@@ -95,11 +98,11 @@ public class SearchResultTest {
     }
 
     @Test
-    public void testGetTotal() {
-        SearchResult searchResult = new SearchResult(new Gson());
+    public void testGetTotal() throws IOException {
+        SearchResult searchResult = new SearchResult(objectMapper);
         searchResult.setSucceeded(true);
         searchResult.setJsonString(json);
-        searchResult.setJsonObject(new JsonParser().parse(json).getAsJsonObject());
+        searchResult.setJsonObject(objectMapper.readTree(json));
         searchResult.setPathToResult("hits/hits/_source");
 
         Integer total = searchResult.getTotal();
@@ -108,7 +111,7 @@ public class SearchResultTest {
     }
 
     @Test
-    public void testGetTotalWhenTotalMissing() {
+    public void testGetTotalWhenTotalMissing() throws IOException {
         String jsonWithoutTotal = "{\n" +
                 "    \"_shards\":{\n" +
                 "        \"total\" : 5,\n" +
@@ -130,10 +133,10 @@ public class SearchResultTest {
                 "        ]\n" +
                 "    }\n" +
                 "}";
-        SearchResult searchResult = new SearchResult(new Gson());
+        SearchResult searchResult = new SearchResult(objectMapper);
         searchResult.setSucceeded(true);
         searchResult.setJsonString(jsonWithoutTotal);
-        searchResult.setJsonObject(new JsonParser().parse(jsonWithoutTotal).getAsJsonObject());
+        searchResult.setJsonObject(objectMapper.readTree(jsonWithoutTotal));
         searchResult.setPathToResult("hits/hits/_source");
 
         Integer total = searchResult.getTotal();
@@ -141,11 +144,11 @@ public class SearchResultTest {
     }
 
     @Test
-    public void testGetHits() {
-        SearchResult searchResult = new SearchResult(new Gson());
+    public void testGetHits() throws IOException {
+        SearchResult searchResult = new SearchResult(objectMapper);
         searchResult.setSucceeded(true);
         searchResult.setJsonString(json);
-        searchResult.setJsonObject(new JsonParser().parse(json).getAsJsonObject());
+        searchResult.setJsonObject(objectMapper.readTree(json));
         searchResult.setPathToResult("hits/hits/_source");
 
         List hits = searchResult.getHits(Object.class);
@@ -158,11 +161,11 @@ public class SearchResultTest {
     }
 
     @Test
-    public void testGetHitsWithoutMetadata() {
-        final SearchResult searchResult = new SearchResult(new Gson());
+    public void testGetHitsWithoutMetadata() throws IOException {
+        final SearchResult searchResult = new SearchResult(objectMapper);
         searchResult.setSucceeded(true);
         searchResult.setJsonString(json);
-        searchResult.setJsonObject(new JsonParser().parse(json).getAsJsonObject());
+        searchResult.setJsonObject(objectMapper.readTree(json));
         searchResult.setPathToResult("hits/hits/_source");
 
         assertTrue(getFirstHitSource(searchResult.getHits(Object.class)).containsKey(SearchResult.ES_METADATA_ID));
@@ -180,11 +183,11 @@ public class SearchResultTest {
     }
 
     @Test
-    public void testGetFirstHit() {
-        SearchResult searchResult = new SearchResult(new Gson());
+    public void testGetFirstHit() throws IOException {
+        SearchResult searchResult = new SearchResult(objectMapper);
         searchResult.setSucceeded(true);
         searchResult.setJsonString(json);
-        searchResult.setJsonObject(new JsonParser().parse(json).getAsJsonObject());
+        searchResult.setJsonObject(objectMapper.readTree(json));
         searchResult.setPathToResult("hits/hits/_source");
 
         SearchResult.Hit hit = searchResult.getFirstHit(Object.class);
@@ -206,7 +209,7 @@ public class SearchResultTest {
 
     @Test
     public void testGetHitsWhenOperationFails() {
-        SearchResult searchResult = new SearchResult(new Gson());
+        SearchResult searchResult = new SearchResult(objectMapper);
         searchResult.setSucceeded(false);
 
         List hits = searchResult.getHits(Object.class);
@@ -220,7 +223,7 @@ public class SearchResultTest {
 
     @Test
     public void testGetFirstHitWhenOperationFails() {
-        SearchResult searchResult = new SearchResult(new Gson());
+        SearchResult searchResult = new SearchResult(objectMapper);
         searchResult.setSucceeded(false);
 
         SearchResult.Hit hit = searchResult.getFirstHit(Object.class);
@@ -231,7 +234,7 @@ public class SearchResultTest {
     }
 
     @Test
-    public void testGetScore() {
+    public void testGetScore() throws IOException {
         String jsonWithScore = "{\n" +
                 "    \"_shards\":{\n" +
                 "        \"total\" : 5,\n" +
@@ -259,10 +262,10 @@ public class SearchResultTest {
                 "    }\n" +
                 "}";
 
-        SearchResult searchResult = new SearchResult(new Gson());
+        SearchResult searchResult = new SearchResult(objectMapper);
         searchResult.setSucceeded(true);
         searchResult.setJsonString(jsonWithScore);
-        searchResult.setJsonObject(new JsonParser().parse(jsonWithScore).getAsJsonObject());
+        searchResult.setJsonObject(objectMapper.readTree(jsonWithScore));
         searchResult.setPathToResult("hits/hits/_source");
 
         SearchResult.Hit hit = searchResult.getFirstHit(Object.class);
@@ -283,7 +286,7 @@ public class SearchResultTest {
     }
 
     @Test
-    public void testGetVersion() {
+    public void testGetVersion() throws IOException {
         Long someVersion = Integer.MAX_VALUE + 10L;
 
         String jsonWithVersion = "{\n" +
@@ -314,10 +317,10 @@ public class SearchResultTest {
                 "    }\n" +
                 "}";
 
-        SearchResult searchResult = new SearchResult(new Gson());
+        SearchResult searchResult = new SearchResult(objectMapper);
         searchResult.setSucceeded(true);
         searchResult.setJsonString(jsonWithVersion);
-        searchResult.setJsonObject(new JsonParser().parse(jsonWithVersion).getAsJsonObject());
+        searchResult.setJsonObject(objectMapper.readTree(jsonWithVersion));
         searchResult.setPathToResult("hits/hits/_source");
 
         SearchResult.Hit<TestObject, Void> hit = searchResult.getFirstHit(TestObject.class);
@@ -328,7 +331,7 @@ public class SearchResultTest {
         assertEquals("Incorrect version", someVersion, hit.source.getVersion());
     }
 
-    class TestObject {
+    private static class TestObject {
         @JestId
         private String id;
 

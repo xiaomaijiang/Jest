@@ -1,6 +1,6 @@
 package io.searchbox.client.config;
 
-import com.google.gson.Gson;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.Collection;
 import java.util.LinkedHashSet;
@@ -25,7 +25,7 @@ public class ClientConfig {
     private long maxConnectionIdleTime;
     private TimeUnit discoveryFrequencyTimeUnit;
     private TimeUnit maxConnectionIdleTimeDurationTimeUnit;
-    private Gson gson;
+    private ObjectMapper objectMapper;
 
     private String defaultSchemeForDiscoveredNodes;
 
@@ -44,7 +44,7 @@ public class ClientConfig {
         this.readTimeout = builder.readTimeout;
         this.maxConnectionIdleTime = builder.maxConnectionIdleTime;
         this.maxConnectionIdleTimeDurationTimeUnit = builder.maxConnectionIdleTimeDurationTimeUnit;
-        this.gson = builder.gson;
+        this.objectMapper = builder.objectMapper;
         this.defaultSchemeForDiscoveredNodes = builder.defaultSchemeForDiscoveredNodes;
     }
 
@@ -88,8 +88,8 @@ public class ClientConfig {
         return maxConnectionIdleTimeDurationTimeUnit;
     }
 
-    public Gson getGson() {
-        return gson;
+    public ObjectMapper getObjectMapper() {
+        return objectMapper;
     }
 
     public String getDefaultSchemeForDiscoveredNodes() {
@@ -133,7 +133,7 @@ public class ClientConfig {
                 discoveryFrequencyTimeUnit,
                 maxConnectionIdleTime,
                 maxConnectionIdleTimeDurationTimeUnit,
-                gson,
+                objectMapper,
                 defaultSchemeForDiscoveredNodes);
     }
 
@@ -161,7 +161,7 @@ public class ClientConfig {
                 && Objects.equals(discoveryFrequencyTimeUnit, rhs.discoveryFrequencyTimeUnit)
                 && Objects.equals(maxConnectionIdleTime, rhs.maxConnectionIdleTime)
                 && Objects.equals(maxConnectionIdleTimeDurationTimeUnit, rhs.maxConnectionIdleTimeDurationTimeUnit)
-                && Objects.equals(gson, rhs.gson)
+                && Objects.equals(objectMapper, rhs.objectMapper)
                 && Objects.equals(defaultSchemeForDiscoveredNodes, rhs.defaultSchemeForDiscoveredNodes);
     }
 
@@ -179,7 +179,7 @@ public class ClientConfig {
         protected Integer readTimeout = 3000;
         protected TimeUnit discoveryFrequencyTimeUnit = TimeUnit.SECONDS;
         protected TimeUnit maxConnectionIdleTimeDurationTimeUnit = TimeUnit.SECONDS;
-        protected Gson gson;
+        protected ObjectMapper objectMapper;
         protected String defaultSchemeForDiscoveredNodes = "http://";
 
         public AbstractBuilder(Collection<String> serverUris) {
@@ -199,7 +199,7 @@ public class ClientConfig {
             this.discoveryFrequencyTimeUnit = clientConfig.discoveryFrequencyTimeUnit;
             this.connTimeout = clientConfig.connTimeout;
             this.readTimeout = clientConfig.readTimeout;
-            this.gson = clientConfig.gson;
+            this.objectMapper = clientConfig.objectMapper;
         }
 
         public K addServer(String serverUri) {
@@ -212,8 +212,8 @@ public class ClientConfig {
             return (K) this;
         }
 
-        public K gson(Gson gson) {
-            this.gson = gson;
+        public K objectMapper(ObjectMapper objectMapper) {
+            this.objectMapper = objectMapper;
             return (K) this;
         }
 

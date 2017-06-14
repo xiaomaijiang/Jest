@@ -1,7 +1,7 @@
 package io.searchbox.indices;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
-import com.google.gson.Gson;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -11,6 +11,8 @@ import static org.junit.Assert.assertNotEquals;
  * @author cihat keser
  */
 public class AnalyzeTest {
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Test
     public void testBasicUrlGeneration() {
@@ -60,7 +62,7 @@ public class AnalyzeTest {
         Analyze analyze = new Analyze.Builder()
                 .text("foo")
                 .build();
-        assertEquals("{\"text\": [\"foo\"]}", analyze.getData(new Gson()));
+        assertEquals("{\"text\":[\"foo\"]}", analyze.getData(objectMapper));
     }
 
     @Test
@@ -69,7 +71,7 @@ public class AnalyzeTest {
                 .text("foo")
                 .text("bar")
                 .build();
-        assertEquals("{\"text\": [\"foo\",\"bar\"]}", analyze.getData(new Gson()));
+        assertEquals("{\"text\":[\"foo\",\"bar\"]}", analyze.getData(objectMapper));
     }
 
     @Test
@@ -78,7 +80,7 @@ public class AnalyzeTest {
                 .text(ImmutableList.of("foo", "bar"))
                 .text("baz")
                 .build();
-        assertEquals("{\"text\": [\"foo\",\"bar\",\"baz\"]}", analyze.getData(new Gson()));
+        assertEquals("{\"text\":[\"foo\",\"bar\",\"baz\"]}", analyze.getData(objectMapper));
     }
 
     @Test

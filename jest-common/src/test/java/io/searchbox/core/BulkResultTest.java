@@ -1,15 +1,14 @@
 package io.searchbox.core;
 
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.util.Map;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 public class BulkResultTest {
 
@@ -70,12 +69,14 @@ public class BulkResultTest {
       "    ]\n" +
       "}";
 
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
     @SuppressWarnings("unchecked")
     @Test
-    public void bulkResultWithFailures() {
-        BulkResult bulkResult = new BulkResult(new GsonBuilder().serializeNulls().create());
+    public void bulkResultWithFailures() throws IOException {
+        BulkResult bulkResult = new BulkResult(new ObjectMapper());
         bulkResult.setJsonString(indexFailedResult);
-        bulkResult.setJsonMap(new Gson().fromJson(indexFailedResult, Map.class));
+        bulkResult.setJsonMap(objectMapper.readValue(indexFailedResult, Map.class));
         bulkResult.setSucceeded(false);
 
         assertEquals(1, bulkResult.getItems().size());
@@ -91,10 +92,10 @@ public class BulkResultTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    public void bulkResultWithSuccess() {
-        BulkResult bulkResult = new BulkResult(new GsonBuilder().serializeNulls().create());
+    public void bulkResultWithSuccess() throws IOException {
+        BulkResult bulkResult = new BulkResult(new ObjectMapper());
         bulkResult.setJsonString(indexSuccessResult);
-        bulkResult.setJsonMap(new Gson().fromJson(indexSuccessResult, Map.class));
+        bulkResult.setJsonMap(objectMapper.readValue(indexSuccessResult, Map.class));
         bulkResult.setSucceeded(true);
 
         assertEquals(1, bulkResult.getItems().size());
@@ -105,10 +106,10 @@ public class BulkResultTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    public void bulkResultWithFailuresObject() {
-        BulkResult bulkResult = new BulkResult(new GsonBuilder().serializeNulls().create());
+    public void bulkResultWithFailuresObject() throws IOException {
+        BulkResult bulkResult = new BulkResult(new ObjectMapper());
         bulkResult.setJsonString(indexFailedResultObject);
-        bulkResult.setJsonMap(new Gson().fromJson(indexFailedResultObject, Map.class));
+        bulkResult.setJsonMap(objectMapper.readValue(indexFailedResultObject, Map.class));
         bulkResult.setSucceeded(false);
 
         assertEquals(1, bulkResult.getItems().size());

@@ -148,7 +148,7 @@ public class GetIntegrationTest extends AbstractIntegrationTest {
         assertEquals(id, articleResult.getId());
     }
 
-    class Tweet {
+    private static class Tweet {
         @JestId
         String userHash;
         String message;

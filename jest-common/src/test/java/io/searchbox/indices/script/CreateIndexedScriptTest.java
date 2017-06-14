@@ -1,8 +1,7 @@
 package io.searchbox.indices.script;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -13,7 +12,9 @@ import java.io.IOException;
 import static io.searchbox.indices.script.ScriptLanguage.GROOVY;
 import static io.searchbox.indices.script.ScriptLanguage.JAVASCRIPT;
 import static org.hamcrest.CoreMatchers.containsString;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
 
 public class CreateIndexedScriptTest {
 
@@ -59,9 +60,9 @@ public class CreateIndexedScriptTest {
 
         script = builder.build();
 
-        JsonObject jsonPayload = parseAsGson(script.getData(new Gson()));
+        JsonNode jsonPayload = parseTree(script.getData(new ObjectMapper()));
         assertNotNull(jsonPayload.get("script"));
-        assertEquals(groovysnippet, jsonPayload.get("script").getAsString());
+        assertEquals(groovysnippet, jsonPayload.get("script").asText());
     }
 
     @Test
@@ -70,9 +71,9 @@ public class CreateIndexedScriptTest {
 
         script = builder.build();
 
-        JsonObject jsonPayload = parseAsGson(script.getData(new Gson()));
+        JsonNode jsonPayload = parseTree(script.getData(new ObjectMapper()));
         assertNotNull(jsonPayload.get("script"));
-        assertEquals(groovysnippet, jsonPayload.get("script").getAsString());
+        assertEquals(groovysnippet, jsonPayload.get("script").asText());
     }
 
     private File createTempGroovySnippetFile() throws IOException {
@@ -84,7 +85,7 @@ public class CreateIndexedScriptTest {
         return file;
     }
 
-    private JsonObject parseAsGson(String data) {
-        return new JsonParser().parse(data).getAsJsonObject();
+    private JsonNode parseTree(String data) throws IOException {
+        return new ObjectMapper().readTree(data);
     }
 }

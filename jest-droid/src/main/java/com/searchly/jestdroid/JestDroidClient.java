@@ -1,6 +1,6 @@
 package com.searchly.jestdroid;
 
-import com.google.gson.Gson;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.searchly.jestdroid.http.HttpDeleteWithEntity;
 import com.searchly.jestdroid.http.HttpGetWithEntity;
 import io.searchbox.action.Action;
@@ -47,7 +47,7 @@ public class JestDroidClient extends AbstractJestClient implements JestClient {
 
     public <T extends JestResult> T execute(Action<T> clientRequest, RequestConfig requestConfig) throws IOException {
         String elasticSearchRestUrl = getRequestURL(getNextServer(), clientRequest.getURI());
-        HttpUriRequest request = constructHttpMethod(clientRequest.getRestMethodName(), elasticSearchRestUrl, clientRequest.getData(gson), requestConfig);
+        HttpUriRequest request = constructHttpMethod(clientRequest.getRestMethodName(), elasticSearchRestUrl, clientRequest.getData(objectMapper), requestConfig);
 
         // add headers added to action
         if (!clientRequest.getHeaders().isEmpty()) {
@@ -118,7 +118,7 @@ public class JestDroidClient extends AbstractJestClient implements JestClient {
                 response.getEntity() != null ? EntityUtilsHC4.toString(response.getEntity()) : null,
                 statusLine.getStatusCode(),
                 statusLine.getReasonPhrase(),
-                gson
+                objectMapper
         );
     }
 
@@ -130,12 +130,12 @@ public class JestDroidClient extends AbstractJestClient implements JestClient {
         this.httpClient = httpClient;
     }
 
-    public Gson getGson() {
-        return gson;
+    public ObjectMapper getObjectMapper() {
+        return objectMapper;
     }
 
-    public void setGson(Gson gson) {
-        this.gson = gson;
+    public void setObjectMapper(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
     }
 
 }

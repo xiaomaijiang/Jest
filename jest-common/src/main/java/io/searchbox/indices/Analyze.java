@@ -1,11 +1,11 @@
 package io.searchbox.indices;
 
-import com.google.gson.Gson;
 import io.searchbox.action.AbstractAction;
 import io.searchbox.action.GenericResultAbstractAction;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -20,7 +20,7 @@ public class Analyze extends GenericResultAbstractAction {
         super(builder);
 
         this.indexName = builder.index;
-        this.payload = "{\"text\": " + new Gson().toJson(builder.textToAnalyze) + "}";
+        this.payload = Collections.singletonMap("text", builder.textToAnalyze);
         setURI(buildURI());
     }
 

@@ -1,6 +1,6 @@
 package io.searchbox.core.search.aggregation;
 
-import com.google.gson.JsonObject;
+import com.fasterxml.jackson.databind.JsonNode;
 
 import java.util.Objects;
 
@@ -11,7 +11,7 @@ public class SumAggregation extends SingleValueAggregation {
 
     public static final String TYPE = "sum";
 
-    public SumAggregation(String name, JsonObject sumAggregation) {
+    public SumAggregation(String name, JsonNode sumAggregation) {
         super(name, sumAggregation);
     }
 

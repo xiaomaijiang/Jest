@@ -1,9 +1,9 @@
 package io.searchbox.core.search.aggregation;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import com.fasterxml.jackson.databind.JsonNode;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
 
@@ -18,15 +18,17 @@ public class PercentileRanksAggregation extends MetricAggregation {
 
     private Map<String, Double> percentileRanks = new HashMap<String, Double>();
 
-    public PercentileRanksAggregation(String name, JsonObject percentilesAggregation) {
+    public PercentileRanksAggregation(String name, JsonNode percentilesAggregation) {
         super(name, percentilesAggregation);
-        parseSource(percentilesAggregation.getAsJsonObject(String.valueOf(VALUES)));
+        parseSource(percentilesAggregation.get(String.valueOf(VALUES)));
     }
 
-    private void parseSource(JsonObject source) {
-        for (Map.Entry<String, JsonElement> entry : source.entrySet()) {
-            if (!(Double.isNaN(entry.getValue().getAsDouble()))) {
-                percentileRanks.put(entry.getKey(), entry.getValue().getAsDouble());
+    private void parseSource(JsonNode source) {
+        final Iterator<Map.Entry<String, JsonNode>> it = source.fields();
+        while (it.hasNext()) {
+            final Map.Entry<String, JsonNode> entry = it.next();
+            if (!(Double.isNaN(entry.getValue().asDouble()))) {
+                percentileRanks.put(entry.getKey(), entry.getValue().asDouble());
             }
         }
     }

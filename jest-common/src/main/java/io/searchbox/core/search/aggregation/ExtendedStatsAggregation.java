@@ -1,10 +1,12 @@
 package io.searchbox.core.search.aggregation;
 
-import com.google.gson.JsonObject;
+import com.fasterxml.jackson.databind.JsonNode;
 
 import java.util.Objects;
 
-import static io.searchbox.core.search.aggregation.AggregationField.*;
+import static io.searchbox.core.search.aggregation.AggregationField.STD_DEVIATION;
+import static io.searchbox.core.search.aggregation.AggregationField.SUM_OF_SQUARES;
+import static io.searchbox.core.search.aggregation.AggregationField.VARIANCE;
 
 /**
  * @author cfstout
@@ -15,14 +17,14 @@ public class ExtendedStatsAggregation extends StatsAggregation {
     private Double variance;
     private Double stdDeviation;
 
-    public ExtendedStatsAggregation(String name, JsonObject extendedStatsAggregation) {
+    public ExtendedStatsAggregation(String name, JsonNode extendedStatsAggregation) {
         super(name, extendedStatsAggregation);
-        this.sumOfSquares = !extendedStatsAggregation.has(String.valueOf(SUM_OF_SQUARES)) || extendedStatsAggregation.get(String.valueOf(SUM_OF_SQUARES)).isJsonNull() ?
-                null : extendedStatsAggregation.get(String.valueOf(SUM_OF_SQUARES)).getAsDouble();
-        this.variance = !extendedStatsAggregation.has(String.valueOf(VARIANCE)) || extendedStatsAggregation.get(String.valueOf(VARIANCE)).isJsonNull() ?
-                null : extendedStatsAggregation.get(String.valueOf(VARIANCE)).getAsDouble();
-        this.stdDeviation = !extendedStatsAggregation.has(String.valueOf(STD_DEVIATION)) || extendedStatsAggregation.get(String.valueOf(STD_DEVIATION)).isJsonNull() ?
-                null : extendedStatsAggregation.get(String.valueOf(STD_DEVIATION)).getAsDouble();
+        this.sumOfSquares = !extendedStatsAggregation.has(String.valueOf(SUM_OF_SQUARES)) || extendedStatsAggregation.get(String.valueOf(SUM_OF_SQUARES)).isNull() ?
+                null : extendedStatsAggregation.get(String.valueOf(SUM_OF_SQUARES)).asDouble();
+        this.variance = !extendedStatsAggregation.has(String.valueOf(VARIANCE)) || extendedStatsAggregation.get(String.valueOf(VARIANCE)).isNull() ?
+                null : extendedStatsAggregation.get(String.valueOf(VARIANCE)).asDouble();
+        this.stdDeviation = !extendedStatsAggregation.has(String.valueOf(STD_DEVIATION)) || extendedStatsAggregation.get(String.valueOf(STD_DEVIATION)).isNull() ?
+                null : extendedStatsAggregation.get(String.valueOf(STD_DEVIATION)).asDouble();
     }
 
     /**

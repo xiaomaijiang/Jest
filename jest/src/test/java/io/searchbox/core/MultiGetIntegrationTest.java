@@ -1,7 +1,6 @@
 package io.searchbox.core;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
+import com.fasterxml.jackson.databind.JsonNode;
 import io.searchbox.action.Action;
 import io.searchbox.client.JestResult;
 import io.searchbox.common.AbstractIntegrationTest;
@@ -39,15 +38,15 @@ public class MultiGetIntegrationTest extends AbstractIntegrationTest {
         Action action = new MultiGet.Builder.ByDoc(doc1).build();
         JestResult result = client.execute(action);
         assertTrue(result.getErrorMessage(), result.isSucceeded());
-        result.getJsonObject().getAsJsonArray("docs");
+        result.getJsonObject().get("docs");
 
-        JsonArray actualDocs = result.getJsonObject().getAsJsonArray("docs");
+        JsonNode actualDocs = result.getJsonObject().get("docs");
         assertEquals("Number of docs in response should match the number of docs in requests.", 1, actualDocs.size());
 
-        JsonObject actualDoc1 = actualDocs.get(0).getAsJsonObject();
+        JsonNode actualDoc1 = actualDocs.get(0);
         assertTrue("Document 1 is indexed and should have been found by the MultiGet request.",
-                actualDoc1.getAsJsonPrimitive("found").getAsBoolean());
-        JsonObject actualSource = actualDoc1.getAsJsonObject("_source");
+                actualDoc1.get("found").asBoolean());
+        JsonNode actualSource = actualDoc1.get("_source");
         assertNotNull("Response doc should have source", actualSource);
         assertNull("Response doc source should not have unrequested text field", actualSource.get("text"));
         assertNotNull("Response doc source should have requested author field", actualSource.get("author"));
@@ -61,14 +60,14 @@ public class MultiGetIntegrationTest extends AbstractIntegrationTest {
         Action action = new MultiGet.Builder.ByDoc(doc1).build();
         JestResult result = client.execute(action);
         assertTrue(result.getErrorMessage(), result.isSucceeded());
-        result.getJsonObject().getAsJsonArray("docs");
+        result.getJsonObject().get("docs");
 
-        JsonArray actualDocs = result.getJsonObject().getAsJsonArray("docs");
+        JsonNode actualDocs = result.getJsonObject().get("docs");
         assertEquals("Number of docs in response should match the number of docs in requests.", 1, actualDocs.size());
 
-        JsonObject actualDoc1 = actualDocs.get(0).getAsJsonObject();
+        JsonNode actualDoc1 = actualDocs.get(0);
         assertTrue("Document 1 is indexed and should have been found by the MultiGet request.",
-                actualDoc1.getAsJsonPrimitive("found").getAsBoolean());
+                actualDoc1.get("found").asBoolean());
         assertNull("Response doc should not have source", actualDoc1.get("_source"));
     }
 
@@ -82,17 +81,17 @@ public class MultiGetIntegrationTest extends AbstractIntegrationTest {
         Action action = new MultiGet.Builder.ByDoc(docs).build();
         JestResult result = client.execute(action);
         assertTrue(result.getErrorMessage(), result.isSucceeded());
-        result.getJsonObject().getAsJsonArray("docs");
+        result.getJsonObject().get("docs");
 
-        JsonArray actualDocs = result.getJsonObject().getAsJsonArray("docs");
+        JsonNode actualDocs = result.getJsonObject().get("docs");
         assertEquals("Number of docs in response should match the number of docs in requests.", 3, actualDocs.size());
 
         assertTrue("Document 1 is indexed and should have been found by the MultiGet request.",
-                actualDocs.get(0).getAsJsonObject().getAsJsonPrimitive("found").getAsBoolean());
+                actualDocs.get(0).get("found").asBoolean());
         assertTrue("Document 2 is indexed and should have been found by the MultiGet request.",
-                actualDocs.get(1).getAsJsonObject().getAsJsonPrimitive("found").getAsBoolean());
+                actualDocs.get(1).get("found").asBoolean());
         assertTrue("Document 3 is indexed and should have been found by the MultiGet request.",
-                actualDocs.get(2).getAsJsonObject().getAsJsonPrimitive("found").getAsBoolean());
+                actualDocs.get(2).get("found").asBoolean());
     }
 
     @Test
@@ -105,13 +104,13 @@ public class MultiGetIntegrationTest extends AbstractIntegrationTest {
         JestResult result = client.execute(action);
         assertTrue(result.getErrorMessage(), result.isSucceeded());
 
-        JsonArray actualDocs = result.getJsonObject().getAsJsonArray("docs");
+        JsonNode actualDocs = result.getJsonObject().get("docs");
         assertEquals("Number of docs in response should match the number of docs in requests.", 2, actualDocs.size());
 
         assertTrue("Document 1 is indexed and should have been found by the MultiGet request.",
-                actualDocs.get(0).getAsJsonObject().getAsJsonPrimitive("found").getAsBoolean());
+                actualDocs.get(0).get("found").asBoolean());
         assertTrue("Document 3 is indexed and should have been found by the MultiGet request.",
-                actualDocs.get(1).getAsJsonObject().getAsJsonPrimitive("found").getAsBoolean());
+                actualDocs.get(1).get("found").asBoolean());
     }
 
     @Test
@@ -125,15 +124,15 @@ public class MultiGetIntegrationTest extends AbstractIntegrationTest {
         JestResult result = client.execute(action);
         assertTrue(result.getErrorMessage(), result.isSucceeded());
 
-        JsonArray actualDocs = result.getJsonObject().getAsJsonArray("docs");
+        JsonNode actualDocs = result.getJsonObject().get("docs");
         assertEquals("Number of docs in response should match the number of docs in requests.", 3, actualDocs.size());
 
         assertTrue("Document 1 is indexed and should have been found by the MultiGet request.",
-                actualDocs.get(0).getAsJsonObject().getAsJsonPrimitive("found").getAsBoolean());
+                actualDocs.get(0).get("found").asBoolean());
         assertTrue("Document 2 is indexed and should have been found by the MultiGet request.",
-                actualDocs.get(1).getAsJsonObject().getAsJsonPrimitive("found").getAsBoolean());
+                actualDocs.get(1).get("found").asBoolean());
         assertFalse("Document 6 is not indexed and should have not been found by the MultiGet request.",
-                actualDocs.get(2).getAsJsonObject().getAsJsonPrimitive("found").getAsBoolean());
+                actualDocs.get(2).get("found").asBoolean());
     }
 
     @Test
@@ -142,15 +141,15 @@ public class MultiGetIntegrationTest extends AbstractIntegrationTest {
         JestResult result = client.execute(action);
         assertTrue(result.getErrorMessage(), result.isSucceeded());
 
-        JsonArray actualDocs = result.getJsonObject().getAsJsonArray("docs");
+        JsonNode actualDocs = result.getJsonObject().get("docs");
         assertEquals("Number of docs in response should match the number of docs in requests.", 3, actualDocs.size());
 
         assertTrue("Document 1 is indexed and should have been found by the MultiGet request.",
-                actualDocs.get(0).getAsJsonObject().getAsJsonPrimitive("found").getAsBoolean());
+                actualDocs.get(0).get("found").asBoolean());
         assertTrue("Document 2 is indexed and should have been found by the MultiGet request.",
-                actualDocs.get(1).getAsJsonObject().getAsJsonPrimitive("found").getAsBoolean());
+                actualDocs.get(1).get("found").asBoolean());
         assertTrue("Document 3 is indexed and should have been found by the MultiGet request.",
-                actualDocs.get(2).getAsJsonObject().getAsJsonPrimitive("found").getAsBoolean());
+                actualDocs.get(2).get("found").asBoolean());
     }
 
     @Test
@@ -159,13 +158,13 @@ public class MultiGetIntegrationTest extends AbstractIntegrationTest {
         JestResult result = client.execute(action);
         assertTrue(result.getErrorMessage(), result.isSucceeded());
 
-        JsonArray actualDocs = result.getJsonObject().getAsJsonArray("docs");
+        JsonNode actualDocs = result.getJsonObject().get("docs");
         assertEquals("Number of docs in response should match the number of docs in requests.", 2, actualDocs.size());
 
         assertTrue("Document 1 is indexed and should have been found by the MultiGet request.",
-                actualDocs.get(0).getAsJsonObject().getAsJsonPrimitive("found").getAsBoolean());
+                actualDocs.get(0).get("found").asBoolean());
         assertTrue("Document 3 is indexed and should have been found by the MultiGet request.",
-                actualDocs.get(1).getAsJsonObject().getAsJsonPrimitive("found").getAsBoolean());
+                actualDocs.get(1).get("found").asBoolean());
     }
 
     @Test
@@ -174,15 +173,15 @@ public class MultiGetIntegrationTest extends AbstractIntegrationTest {
         JestResult result = client.execute(action);
         assertTrue(result.getErrorMessage(), result.isSucceeded());
 
-        JsonArray actualDocs = result.getJsonObject().getAsJsonArray("docs");
+        JsonNode actualDocs = result.getJsonObject().get("docs");
         assertEquals("Number of docs in response should match the number of docs in requests.", 3, actualDocs.size());
 
         assertTrue("Document 1 is indexed and should have been found by the MultiGet request.",
-                actualDocs.get(0).getAsJsonObject().getAsJsonPrimitive("found").getAsBoolean());
+                actualDocs.get(0).get("found").asBoolean());
         assertTrue("Document 3 is indexed and should have been found by the MultiGet request.",
-                actualDocs.get(1).getAsJsonObject().getAsJsonPrimitive("found").getAsBoolean());
+                actualDocs.get(1).get("found").asBoolean());
         assertFalse("Document 7 is not indexed and should not have been found by the MultiGet request.",
-                actualDocs.get(2).getAsJsonObject().getAsJsonPrimitive("found").getAsBoolean());
+                actualDocs.get(2).get("found").asBoolean());
     }
 
 }

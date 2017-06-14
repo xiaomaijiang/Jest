@@ -1,8 +1,11 @@
 package io.searchbox.snapshot;
 
-import com.google.gson.Gson;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.elasticsearch.common.settings.Settings;
 import org.junit.Test;
+
+import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
 
@@ -14,7 +17,7 @@ public class CreateSnapshotRepositoryTest {
     private String repository = "seohoo";
 
     @Test
-    public void testBasicUriGeneration() {
+    public void testBasicUriGeneration() throws IOException {
         final Settings.Builder registerRepositorySettings = Settings.settingsBuilder();
         registerRepositorySettings.put("type", "fs");
         registerRepositorySettings.put("settings.compress", "true");
@@ -28,7 +31,8 @@ public class CreateSnapshotRepositoryTest {
 
         assertEquals("PUT", createSnapshotRepository.getRestMethodName());
         assertEquals("/_snapshot/" + repository, createSnapshotRepository.getURI());
-        String settings = new Gson().toJson(createSnapshotRepository.getData(new Gson()));
+        final ObjectMapper objectMapper = new ObjectMapper();
+        String settings = objectMapper.writeValueAsString(createSnapshotRepository.getData(objectMapper));
         assertEquals("\"{\\\"settings.chunk_size\\\":\\\"10m\\\",\\\"settings.compress\\\":\\\"true\\\",\\\"settings.location\\\":\\\"/mount/backups/my_backup\\\",\\\"settings.max_restore_bytes_per_sec\\\":\\\"40mb\\\",\\\"settings.max_snapshot_bytes_per_sec\\\":\\\"40mb\\\",\\\"settings.readonly\\\":\\\"false\\\",\\\"type\\\":\\\"fs\\\"}\"", settings);
     }
 

@@ -3,6 +3,8 @@ package io.searchbox.core;
 import io.searchbox.action.Action;
 import org.junit.Test;
 
+import java.io.IOException;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -56,11 +58,11 @@ public class SuggestTest {
     }
 
     @Test
-    public void getDataSimple() {
+    public void getDataSimple() throws IOException {
         String query = "{\"elementSuggestion\":{\"text\":\"courgette\",\"completion\":{\"field\":\"element.completion\",\"size\":10,\"fuzzy\":{}}}}";
         Action suggest = new Suggest.Builder(query).build();
 
         assertNotNull("data", suggest.getData(null));
-        assertEquals(query, suggest.getData(null).toString());
+        assertEquals(query, suggest.getData(null));
     }
 }

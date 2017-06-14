@@ -1,6 +1,6 @@
 package io.searchbox.indices;
 
-import com.google.gson.JsonObject;
+import com.fasterxml.jackson.databind.JsonNode;
 import io.searchbox.action.Action;
 import io.searchbox.client.JestResult;
 import io.searchbox.common.AbstractIntegrationTest;
@@ -45,11 +45,11 @@ public class GetMappingIntegrationTest extends AbstractIntegrationTest {
         JestResult result = client.execute(getMapping);
         assertTrue(result.getErrorMessage(), result.isSucceeded());
 
-        JsonObject resultJson = result.getJsonObject();
+        JsonNode resultJson = result.getJsonObject();
         assertNotNull("GetMapping response JSON should include the index " + INDEX_1_NAME,
-                resultJson.getAsJsonObject(INDEX_1_NAME));
+                resultJson.get(INDEX_1_NAME));
         assertNotNull("GetMapping response JSON should include the index " + INDEX_2_NAME,
-                resultJson.getAsJsonObject(INDEX_2_NAME));
+                resultJson.get(INDEX_2_NAME));
     }
 
     @Test
@@ -74,9 +74,9 @@ public class GetMappingIntegrationTest extends AbstractIntegrationTest {
         assertTrue(result.getErrorMessage(), result.isSucceeded());
 
         System.out.println("result.getJsonString() = " + result.getJsonString());
-        JsonObject resultJson = result.getJsonObject();
+        JsonNode resultJson = result.getJsonObject();
         assertNotNull("GetMapping response JSON should include the index " + INDEX_2_NAME,
-                resultJson.getAsJsonObject(INDEX_2_NAME));
+                resultJson.get(INDEX_2_NAME));
     }
 
     @Test
@@ -108,11 +108,11 @@ public class GetMappingIntegrationTest extends AbstractIntegrationTest {
         JestResult result = client.execute(getMapping);
         assertTrue(result.getErrorMessage(), result.isSucceeded());
 
-        JsonObject resultJson = result.getJsonObject();
+        JsonNode resultJson = result.getJsonObject();
         assertNotNull("GetMapping response JSON should include the index " + INDEX_1_NAME,
-                resultJson.getAsJsonObject(INDEX_1_NAME));
+                resultJson.get(INDEX_1_NAME));
         assertNotNull("GetMapping response JSON should include the index " + INDEX_2_NAME,
-                resultJson.getAsJsonObject(INDEX_2_NAME));
+                resultJson.get(INDEX_2_NAME));
     }
 
 }

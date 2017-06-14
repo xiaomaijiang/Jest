@@ -1,6 +1,6 @@
 package io.searchbox.core.search.aggregation;
 
-import com.google.gson.JsonObject;
+import com.fasterxml.jackson.databind.JsonNode;
 
 import java.util.Objects;
 
@@ -11,7 +11,7 @@ public class MaxAggregation extends SingleValueAggregation {
 
     public static final String TYPE = "max";
 
-    public MaxAggregation(String name, JsonObject maxAggregation) {
+    public MaxAggregation(String name, JsonNode maxAggregation) {
         super(name, maxAggregation);
     }
 

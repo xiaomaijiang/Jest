@@ -41,7 +41,7 @@ public class StatsTest {
                 .indexing(true)
                 .search(true, "group1", "group2")
                 .build();
-        assertEquals("_all/_stats/flush,indexing,search?groups=group1,group2", URLDecoder.decode(action.getURI()));
+        assertEquals("_all/_stats/flush,indexing,search?groups=group1,group2", URLDecoder.decode(action.getURI(), "UTF-8"));
     }
 
     @Test
@@ -51,7 +51,7 @@ public class StatsTest {
                 .indexing(true)
                 .indexing(false)
                 .build();
-        assertEquals("_all/_stats/flush", URLDecoder.decode(action.getURI()));
+        assertEquals("_all/_stats/flush", URLDecoder.decode(action.getURI(), "UTF-8"));
     }
 
 }

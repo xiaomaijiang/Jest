@@ -1,6 +1,6 @@
 package io.searchbox.cluster;
 
-import com.google.gson.JsonObject;
+import com.fasterxml.jackson.databind.JsonNode;
 import io.searchbox.client.JestResult;
 import io.searchbox.common.AbstractIntegrationTest;
 import org.elasticsearch.test.ESIntegTestCase;
@@ -26,15 +26,15 @@ public class StateIntegrationTest extends AbstractIntegrationTest {
         JestResult result = client.execute(new State.Builder().indices(index2).build());
         assertTrue(result.getErrorMessage(), result.isSucceeded());
 
-        JsonObject resultJson = result.getJsonObject();
+        JsonNode resultJson = result.getJsonObject();
         assertNotNull(resultJson);
-        assertNotNull(resultJson.getAsJsonObject("nodes"));
-        assertNotNull(resultJson.getAsJsonObject("routing_table"));
-        assertNotNull(resultJson.getAsJsonObject("blocks"));
+        assertNotNull(resultJson.get("nodes"));
+        assertNotNull(resultJson.get("routing_table"));
+        assertNotNull(resultJson.get("blocks"));
 
-        JsonObject metadata = resultJson.getAsJsonObject("metadata");
+        JsonNode metadata = resultJson.get("metadata");
         assertNotNull(metadata);
-        JsonObject indices = metadata.getAsJsonObject("indices");
+        JsonNode indices = metadata.get("indices");
         assertFalse(indices.has(index1));
         assertTrue(indices.has(index2));
         assertFalse(indices.has(index3));
@@ -45,12 +45,12 @@ public class StateIntegrationTest extends AbstractIntegrationTest {
         JestResult result = client.execute(new State.Builder().withMetadata().build());
         assertTrue(result.getErrorMessage(), result.isSucceeded());
 
-        JsonObject resultJson = result.getJsonObject();
+        JsonNode resultJson = result.getJsonObject();
         assertNotNull(resultJson);
-        assertNull(resultJson.getAsJsonObject("nodes"));
-        assertNull(resultJson.getAsJsonObject("routing_table"));
-        assertNotNull(resultJson.getAsJsonObject("metadata"));
-        assertNull(resultJson.getAsJsonObject("blocks"));
+        assertNull(resultJson.get("nodes"));
+        assertNull(resultJson.get("routing_table"));
+        assertNotNull(resultJson.get("metadata"));
+        assertNull(resultJson.get("blocks"));
     }
 
 }

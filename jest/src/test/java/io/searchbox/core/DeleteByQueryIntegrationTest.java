@@ -46,11 +46,11 @@ public class DeleteByQueryIntegrationTest extends AbstractIntegrationTest {
 
         assertEquals(
                 0,
-                result.getJsonObject().getAsJsonObject("_indices").getAsJsonObject("twitter").get("failed").getAsInt()
+                result.getJsonObject().path("_indices").path("twitter").path("failed").asInt()
         );
         assertEquals(
                 1,
-                result.getJsonObject().getAsJsonObject("_indices").getAsJsonObject("twitter").get("deleted").getAsInt()
+                result.getJsonObject().path("_indices").path("twitter").path("deleted").asInt()
         );
     }
 

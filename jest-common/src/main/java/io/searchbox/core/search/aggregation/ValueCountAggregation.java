@@ -1,6 +1,6 @@
 package io.searchbox.core.search.aggregation;
 
-import com.google.gson.JsonObject;
+import com.fasterxml.jackson.databind.JsonNode;
 
 import java.util.Objects;
 
@@ -15,9 +15,9 @@ public class ValueCountAggregation extends MetricAggregation {
 
     private Long valueCount;
 
-    public ValueCountAggregation(String name, JsonObject valueCountAggregation) {
+    public ValueCountAggregation(String name, JsonNode valueCountAggregation) {
         super(name, valueCountAggregation);
-        valueCount = valueCountAggregation.get(String.valueOf(VALUE)).getAsLong();
+        valueCount = valueCountAggregation.get(String.valueOf(VALUE)).asLong();
     }
 
     public Long getValueCount() {

@@ -1,14 +1,14 @@
 package io.searchbox.core.search.aggregation;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import com.fasterxml.jackson.databind.JsonNode;
 
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
-import static io.searchbox.core.search.aggregation.AggregationField.*;
+import static io.searchbox.core.search.aggregation.AggregationField.BUCKETS;
+import static io.searchbox.core.search.aggregation.AggregationField.DOC_COUNT;
+import static io.searchbox.core.search.aggregation.AggregationField.KEY;
 
 /**
  * @author cfstout
@@ -19,20 +19,19 @@ public class HistogramAggregation extends BucketAggregation {
 
     private List<Histogram> histograms = new LinkedList<Histogram>();
 
-    public HistogramAggregation(String name, JsonObject histogramAggregation) {
+    public HistogramAggregation(String name, JsonNode histogramAggregation) {
         super(name, histogramAggregation);
-        if(histogramAggregation.has(String.valueOf(BUCKETS)) && histogramAggregation.get(String.valueOf(BUCKETS)).isJsonArray()) {
-            parseBuckets(histogramAggregation.get(String.valueOf(BUCKETS)).getAsJsonArray());
+        if(histogramAggregation.has(String.valueOf(BUCKETS)) && histogramAggregation.get(String.valueOf(BUCKETS)).isArray()) {
+            parseBuckets(histogramAggregation.get(String.valueOf(BUCKETS)));
         }
     }
 
-    private void parseBuckets(JsonArray bucketsSource) {
-        for (JsonElement bucketv : bucketsSource) {
-            JsonObject bucket = bucketv.getAsJsonObject();
+    private void parseBuckets(JsonNode bucketsSource) {
+        for (JsonNode bucket : bucketsSource) {
             Histogram histogram = new Histogram(
                     bucket,
-                    bucket.get(String.valueOf(KEY)).getAsLong(),
-                    bucket.get(String.valueOf(DOC_COUNT)).getAsLong());
+                    bucket.get(String.valueOf(KEY)).asLong(),
+                    bucket.get(String.valueOf(DOC_COUNT)).asLong());
             histograms.add(histogram);
         }
     }
@@ -45,7 +44,7 @@ public class HistogramAggregation extends BucketAggregation {
 
         private Long key;
 
-        Histogram(JsonObject bucket, Long key, Long count) {
+        Histogram(JsonNode bucket, Long key, Long count) {
             super(bucket, count);
             this.key = key;
         }

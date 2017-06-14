@@ -1,14 +1,17 @@
 package io.searchbox.core.search.aggregation;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import com.fasterxml.jackson.databind.JsonNode;
 
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
-import static io.searchbox.core.search.aggregation.AggregationField.*;
+import static io.searchbox.core.search.aggregation.AggregationField.BUCKETS;
+import static io.searchbox.core.search.aggregation.AggregationField.DOC_COUNT;
+import static io.searchbox.core.search.aggregation.AggregationField.FROM;
+import static io.searchbox.core.search.aggregation.AggregationField.FROM_AS_STRING;
+import static io.searchbox.core.search.aggregation.AggregationField.TO;
+import static io.searchbox.core.search.aggregation.AggregationField.TO_AS_STRING;
 
 /**
  * @author cfstout
@@ -19,23 +22,22 @@ public class Ipv4RangeAggregation extends BucketAggregation{
 
     private List<Ipv4Range> ranges = new LinkedList<Ipv4Range>();
 
-    public Ipv4RangeAggregation(String name, JsonObject ipv4RangeAggregation) {
+    public Ipv4RangeAggregation(String name, JsonNode ipv4RangeAggregation) {
         super(name, ipv4RangeAggregation);
-        if(ipv4RangeAggregation.has(String.valueOf(BUCKETS)) && ipv4RangeAggregation.get(String.valueOf(BUCKETS)).isJsonArray()) {
-            parseBuckets(ipv4RangeAggregation.get(String.valueOf(BUCKETS)).getAsJsonArray());
+        if(ipv4RangeAggregation.has(String.valueOf(BUCKETS)) && ipv4RangeAggregation.get(String.valueOf(BUCKETS)).isArray()) {
+            parseBuckets(ipv4RangeAggregation.get(String.valueOf(BUCKETS)));
         }
     }
 
-    private void parseBuckets(JsonArray bucketsSource) {
-        for (JsonElement bucketv : bucketsSource) {
-            JsonObject bucket = bucketv.getAsJsonObject();
+    private void parseBuckets(JsonNode bucketsSource) {
+        for (JsonNode bucket : bucketsSource) {
             Ipv4Range range = new Ipv4Range(
                     bucket,
-                    bucket.has(String.valueOf(FROM)) ? bucket.get(String.valueOf(FROM)).getAsDouble() : null,
-                    bucket.has(String.valueOf(TO)) ? bucket.get(String.valueOf(TO)).getAsDouble() : null,
-                    bucket.get(String.valueOf(DOC_COUNT)).getAsLong(),
-                    bucket.has(String.valueOf(FROM_AS_STRING)) ? bucket.get(String.valueOf(FROM_AS_STRING)).getAsString() : null,
-                    bucket.has(String.valueOf(TO_AS_STRING)) ? bucket.get(String.valueOf(TO_AS_STRING)).getAsString() : null);
+                    bucket.has(String.valueOf(FROM)) ? bucket.get(String.valueOf(FROM)).asDouble() : null,
+                    bucket.has(String.valueOf(TO)) ? bucket.get(String.valueOf(TO)).asDouble() : null,
+                    bucket.get(String.valueOf(DOC_COUNT)).asLong(),
+                    bucket.has(String.valueOf(FROM_AS_STRING)) ? bucket.get(String.valueOf(FROM_AS_STRING)).asText() : null,
+                    bucket.has(String.valueOf(TO_AS_STRING)) ? bucket.get(String.valueOf(TO_AS_STRING)).asText() : null);
             ranges.add(range);
         }
     }
@@ -48,7 +50,7 @@ public class Ipv4RangeAggregation extends BucketAggregation{
         private String fromAsString;
         private String toAsString;
 
-        public Ipv4Range(JsonObject bucket, Double from, Double to, Long count, String fromString, String toString){
+        public Ipv4Range(JsonNode bucket, Double from, Double to, Long count, String fromString, String toString){
             super(bucket, from, to, count);
             this.fromAsString = fromString;
             this.toAsString = toString;

@@ -1,9 +1,11 @@
 package io.searchbox.core;
 
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.*;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.searchbox.client.JestResult;
+import io.searchbox.client.config.HttpClientConfig;
+import io.searchbox.client.http.JestHttpClient;
+import io.searchbox.common.AbstractIntegrationTest;
+import io.searchbox.params.Parameters;
 import org.elasticsearch.action.get.GetRequest;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.plugins.Plugin;
@@ -13,14 +15,18 @@ import org.json.JSONException;
 import org.junit.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
-import io.searchbox.client.JestResult;
-import io.searchbox.client.config.HttpClientConfig;
-import io.searchbox.client.http.JestHttpClient;
-import io.searchbox.common.AbstractIntegrationTest;
-import io.searchbox.params.Parameters;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.TimeZone;
 
 /**
  * @author Dogukan Sonmez
@@ -28,13 +34,15 @@ import io.searchbox.params.Parameters;
 @ESIntegTestCase.ClusterScope(scope = ESIntegTestCase.Scope.TEST, numDataNodes = 1)
 public class BulkIntegrationTest extends AbstractIntegrationTest {
 
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
     @Override
     protected Collection<Class<? extends Plugin>> nodePlugins() {
         return pluginList(GroovyPlugin.class);
     }
 
     @Test
-    public void bulkOperationWithCustomGson() throws Exception {
+    public void bulkOperationWithCustomObjectMapper() throws Exception {
         String index = "twitter";
         String type = "tweet";
         String id = "1";
@@ -46,7 +54,7 @@ public class BulkIntegrationTest extends AbstractIntegrationTest {
         HttpClientConfig httpClientConfig = new HttpClientConfig.
                 Builder("http://localhost:" + getPort())
                 .multiThreaded(true)
-                .gson(new GsonBuilder().setDateFormat(dateStyle).create())
+                .objectMapper(new ObjectMapper().setDateFormat(new SimpleDateFormat(dateStyle)))
                 .build();
         factory.setHttpClientConfig(httpClientConfig);
         JestHttpClient client = (JestHttpClient) factory.getObject();
@@ -137,7 +145,7 @@ public class BulkIntegrationTest extends AbstractIntegrationTest {
 
         GetResponse getResponse = client().get(new GetRequest("twitter", "tweet", "1")).actionGet();
         assertNotNull(getResponse);
-        assertEquals(new Gson().toJson(source1), getResponse.getSourceAsString());
+        assertEquals(objectMapper.writeValueAsString(source1), getResponse.getSourceAsString());
     }
 
     @Test
@@ -179,7 +187,7 @@ public class BulkIntegrationTest extends AbstractIntegrationTest {
 
         GetResponse getResponse = client().get(new GetRequest("twitter", "tweet", "1")).actionGet();
         assertNotNull(getResponse);
-        assertEquals(new Gson().toJson(source1), getResponse.getSourceAsString());
+        assertEquals(objectMapper.writeValueAsString(source1), getResponse.getSourceAsString());
 
         getResponse = client().get(new GetRequest("twitter", "tweet", "2")).actionGet();
         assertNotNull(getResponse);
@@ -406,7 +414,7 @@ public class BulkIntegrationTest extends AbstractIntegrationTest {
 
         // second index request with create op type should fail because it's a duplicate of the first index request
         assertNotNull(
-                result.getJsonObject().getAsJsonArray("items").get(1).getAsJsonObject().getAsJsonObject("create").get("error").getAsJsonObject().get("reason").getAsString()
+                result.getJsonObject().path("items").path(1).path("create").path("error").path("reason").asText()
         );
     }
 

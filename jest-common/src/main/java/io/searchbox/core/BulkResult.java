@@ -1,11 +1,10 @@
 package io.searchbox.core;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.searchbox.client.JestResult;
 
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -19,8 +18,8 @@ public class BulkResult extends JestResult {
         super(source);
     }
 
-    public BulkResult(Gson gson) {
-        super(gson);
+    public BulkResult(ObjectMapper objectMapper) {
+        super(objectMapper);
     }
 
     /**
@@ -31,12 +30,11 @@ public class BulkResult extends JestResult {
         List<BulkResultItem> items = new LinkedList<BulkResultItem>();
 
         if (jsonObject != null && jsonObject.has("items")) {
-            for (JsonElement jsonElement : jsonObject.getAsJsonArray("items")) {
-                for (Map.Entry<String, JsonElement> entry : jsonElement.getAsJsonObject().entrySet()) {
-                    items.add(new BulkResultItem(
-                            entry.getKey(),
-                            entry.getValue().getAsJsonObject()
-                    ));
+            for (JsonNode jsonElement : jsonObject.get("items")) {
+                final Iterator<Map.Entry<String, JsonNode>> it = jsonElement.fields();
+                while (it.hasNext()) {
+                    Map.Entry<String, JsonNode> entry = it.next();
+                    items.add(new BulkResultItem(entry.getKey(), entry.getValue()));
                 }
             }
         }
@@ -53,14 +51,13 @@ public class BulkResult extends JestResult {
         List<BulkResultItem> items = new LinkedList<BulkResultItem>();
 
         if (jsonObject != null && jsonObject.has("items")) {
-            for (JsonElement jsonElement : jsonObject.getAsJsonArray("items")) {
-                for (Map.Entry<String, JsonElement> entry : jsonElement.getAsJsonObject().entrySet()) {
-                    JsonObject values = entry.getValue().getAsJsonObject();
+            for (JsonNode jsonElement : jsonObject.get("items")) {
+                final Iterator<Map.Entry<String, JsonNode>> it = jsonElement.fields();
+                while (it.hasNext()) {
+                    final Map.Entry<String, JsonNode> entry = it.next();
+                    final JsonNode values = entry.getValue();
                     if (values.has("error")) {
-                        items.add(new BulkResultItem(
-                                entry.getKey(),
-                                values
-                        ));
+                        items.add(new BulkResultItem(entry.getKey(), values));
                     }
                 }
             }
@@ -105,24 +102,24 @@ public class BulkResult extends JestResult {
             this.version = version;
         }
 
-        public BulkResultItem(String operation, JsonObject values) {
+        public BulkResultItem(String operation, JsonNode values) {
             this.operation = operation;
-            this.index = values.get("_index").getAsString();
-            this.type = values.get("_type").getAsString();
-            this.id = values.has("_id") && !values.get("_id").isJsonNull() ? values.get("_id").getAsString() : null;
-            this.status = values.get("status").getAsInt();
+            this.index = values.get("_index").asText();
+            this.type = values.get("_type").asText();
+            this.id = values.has("_id") && !values.get("_id").isNull() ? values.get("_id").asText() : null;
+            this.status = values.get("status").asInt();
             this.error = values.has("error") ? values.get("error").toString() : null;
 
-            if (values.has("error") && values.get("error").isJsonObject()) {
-                final JsonObject errorObject = values.get("error").getAsJsonObject();
-                this.errorType = errorObject.has("type") ? errorObject.get("type").getAsString() : null;
-                this.errorReason = errorObject.has("reason") ? errorObject.get("reason").getAsString() : null;
+            if (values.has("error") && values.get("error").isObject()) {
+                final JsonNode errorObject = values.get("error");
+                this.errorType = errorObject.has("type") ? errorObject.get("type").asText() : null;
+                this.errorReason = errorObject.has("reason") ? errorObject.get("reason").asText() : null;
             } else {
                 this.errorType = null;
                 this.errorReason = null;
             }
 
-            this.version = values.has("_version") ? values.get("_version").getAsInt() : null;
+            this.version = values.has("_version") ? values.get("_version").asInt() : null;
         }
 
         @Override

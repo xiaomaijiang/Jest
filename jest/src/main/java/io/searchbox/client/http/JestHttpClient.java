@@ -1,6 +1,7 @@
 package io.searchbox.client.http;
 
-import com.google.gson.Gson;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.searchbox.action.Action;
 import io.searchbox.client.AbstractJestClient;
 import io.searchbox.client.JestResult;
@@ -80,11 +81,11 @@ public class JestHttpClient extends AbstractJestClient {
     }
 
     @Override
-    public <T extends JestResult> void executeAsync(final Action<T> clientRequest, final JestResultHandler<? super T> resultHandler) {
+    public <T extends JestResult> void executeAsync(final Action<T> clientRequest, final JestResultHandler<? super T> resultHandler) throws IOException {
         executeAsync(clientRequest, resultHandler, null);
     }
 
-    public <T extends JestResult> void executeAsync(final Action<T> clientRequest, final JestResultHandler<? super T> resultHandler, final RequestConfig requestConfig) {
+    public <T extends JestResult> void executeAsync(final Action<T> clientRequest, final JestResultHandler<? super T> resultHandler, final RequestConfig requestConfig) throws IOException {
         synchronized (this) {
             if (!asyncClient.isRunning()) {
                 asyncClient.start();
@@ -110,9 +111,9 @@ public class JestHttpClient extends AbstractJestClient {
         }
     }
 
-    protected <T extends JestResult> HttpUriRequest prepareRequest(final Action<T> clientRequest, final RequestConfig requestConfig) {
+    protected <T extends JestResult> HttpUriRequest prepareRequest(final Action<T> clientRequest, final RequestConfig requestConfig) throws IOException {
         String elasticSearchRestUrl = getRequestURL(getNextServer(), clientRequest.getURI());
-        HttpUriRequest request = constructHttpMethod(clientRequest.getRestMethodName(), elasticSearchRestUrl, clientRequest.getData(gson), requestConfig);
+        HttpUriRequest request = constructHttpMethod(clientRequest.getRestMethodName(), elasticSearchRestUrl, clientRequest.getData(objectMapper), requestConfig);
 
         log.debug("Request method={} url={}", clientRequest.getRestMethodName(), elasticSearchRestUrl);
 
@@ -194,9 +195,9 @@ public class JestHttpClient extends AbstractJestClient {
                     response.getEntity() == null ? null : EntityUtils.toString(response.getEntity()),
                     statusLine.getStatusCode(),
                     statusLine.getReasonPhrase(),
-                    gson
+                    objectMapper
             );
-        } catch (com.google.gson.JsonSyntaxException e) {
+        } catch (JsonParseException e) {
             for (Header header : response.getHeaders("Content-Type")) {
                 final String mimeType = header.getValue();
                 if (!mimeType.startsWith("application/json")) {
@@ -226,12 +227,12 @@ public class JestHttpClient extends AbstractJestClient {
         this.asyncClient = asyncClient;
     }
 
-    public Gson getGson() {
-        return gson;
+    public ObjectMapper getObjectMapper() {
+        return objectMapper;
     }
 
-    public void setGson(Gson gson) {
-        this.gson = gson;
+    public void setObjectMapper(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
     }
 
     public HttpClientContext getHttpClientContextTemplate() {

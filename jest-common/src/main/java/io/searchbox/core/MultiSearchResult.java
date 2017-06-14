@@ -1,9 +1,7 @@
 package io.searchbox.core;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.searchbox.client.JestResult;
 
 import java.util.ArrayList;
@@ -20,17 +18,17 @@ public class MultiSearchResult extends JestResult {
         super(source);
     }
 
-    public MultiSearchResult(Gson gson) {
-        super(gson);
+    public MultiSearchResult(ObjectMapper objectMapper) {
+        super(objectMapper);
     }
 
     public List<MultiSearchResponse> getResponses() {
         List<MultiSearchResponse> multiSearchResponses = new ArrayList<MultiSearchResponse>();
 
         if(jsonObject != null && jsonObject.has(RESPONSES_KEY)) {
-            JsonArray responsesArray = jsonObject.getAsJsonArray(RESPONSES_KEY);
-            for(JsonElement responseElement : responsesArray) {
-                multiSearchResponses.add(new MultiSearchResponse(responseElement.getAsJsonObject()));
+            JsonNode responsesArray = jsonObject.get(RESPONSES_KEY);
+            for(JsonNode responseElement : responsesArray) {
+                multiSearchResponses.add(new MultiSearchResponse(responseElement));
             }
         }
 
@@ -43,22 +41,17 @@ public class MultiSearchResult extends JestResult {
         public final String errorMessage;
         public final SearchResult searchResult;
 
-        public MultiSearchResponse(JsonObject jsonObject) {
-            final JsonElement error = jsonObject.get(ERROR_KEY);
+        public MultiSearchResponse(JsonNode jsonObject) {
+            final JsonNode error = jsonObject.get(ERROR_KEY);
             if(error != null) {
                 isError = true;
-                if (error.isJsonPrimitive()) {
-                    errorMessage = error.getAsString();
-                }
-                else {
-                    errorMessage = error.toString();
-                }
+                errorMessage = error.asText();
                 searchResult = null;
             } else {
                 isError = false;
                 errorMessage = null;
 
-                searchResult = new SearchResult(gson);
+                searchResult = new SearchResult(objectMapper);
                 searchResult.setSucceeded(true);
                 searchResult.setResponseCode(responseCode);
                 searchResult.setJsonObject(jsonObject);

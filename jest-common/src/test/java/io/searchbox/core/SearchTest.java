@@ -1,27 +1,23 @@
 package io.searchbox.core;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.searchbox.action.Action;
+import io.searchbox.core.search.sort.Sort;
+import io.searchbox.core.search.sort.Sort.Sorting;
+import org.json.JSONException;
+import org.junit.Test;
+import org.skyscreamer.jsonassert.JSONAssert;
+
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-
-import java.util.Arrays;
-import java.util.List;
-
-import org.json.JSONException;
-import org.junit.Test;
-import org.skyscreamer.jsonassert.JSONAssert;
-
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-
-import io.searchbox.action.Action;
-import io.searchbox.core.search.sort.Sort;
-import io.searchbox.core.search.sort.Sort.Sorting;
 
 /**
  * @author Dogukan Sonmez
@@ -100,26 +96,26 @@ public class SearchTest {
     }
 
     @Test
-    public void sourceFilteringByQueryTest() {
+    public void sourceFilteringByQueryTest() throws IOException {
         String query = "{\"sort\":[],\"_source\":{\"exclude\":[\"excludeFieldName\"],\"include\":[\"includeFieldName\"]}}";
         Action search = new Search.Builder(query).build();
 
-        JsonParser parser = new JsonParser();
-        JsonElement parsed = parser.parse(search.getData(new Gson()).toString());
-        JsonObject obj = parsed.getAsJsonObject();
-        JsonObject source = obj.getAsJsonObject("_source");
+        final ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode parsed = objectMapper.readTree(search.getData(objectMapper));
+        JsonNode obj = parsed;
+        JsonNode source = obj.get("_source");
 
-        JsonArray includePattern = source.getAsJsonArray("include");
+        JsonNode includePattern = source.get("include");
         assertEquals(1, includePattern.size());
-        assertEquals("includeFieldName", includePattern.get(0).getAsString());
+        assertEquals("includeFieldName", includePattern.get(0).asText());
 
-        JsonArray excludePattern = source.getAsJsonArray("exclude");
+        JsonNode excludePattern = source.get("exclude");
         assertEquals(1, excludePattern.size());
-        assertEquals("excludeFieldName", excludePattern.get(0).getAsString());
+        assertEquals("excludeFieldName", excludePattern.get(0).asText());
     }
 
     @Test
-    public void sourceFilteringParamTest() {
+    public void sourceFilteringParamTest() throws IOException {
         String query = "{\"query\" : { \"term\" : { \"name\" : \"KangSungJeon\" } }}";
         String includePatternItem1 = "SeolaIncludeFieldName";
         String includePatternItem2 = "SeohooIncludeFieldName";
@@ -133,24 +129,24 @@ public class SearchTest {
                 .addSourceExcludePattern(excludePatternItem2)
                 .build();
 
-        JsonParser parser = new JsonParser();
-        JsonElement parsed = parser.parse(search.getData(new Gson()).toString());
-        JsonObject obj = parsed.getAsJsonObject();
-        JsonObject source = obj.getAsJsonObject("_source");
+        final ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode parsed = objectMapper.readTree(search.getData(objectMapper));
+        JsonNode obj = parsed;
+        JsonNode source = obj.get("_source");
 
-        JsonArray includePattern = source.getAsJsonArray("include");
+        JsonNode includePattern = source.get("include");
         assertEquals(2, includePattern.size());
-        assertEquals(includePatternItem1, includePattern.get(0).getAsString());
-        assertEquals(includePatternItem2, includePattern.get(1).getAsString());
+        assertEquals(includePatternItem1, includePattern.get(0).asText());
+        assertEquals(includePatternItem2, includePattern.get(1).asText());
 
-        JsonArray excludePattern = source.getAsJsonArray("exclude");
+        JsonNode excludePattern = source.get("exclude");
         assertEquals(2, excludePattern.size());
-        assertEquals(excludePatternItem1, excludePattern.get(0).getAsString());
-        assertEquals(excludePatternItem2, excludePattern.get(1).getAsString());
+        assertEquals(excludePatternItem1, excludePattern.get(0).asText());
+        assertEquals(excludePatternItem2, excludePattern.get(1).asText());
     }
 
     @Test
-    public void supportElasticsearchPermissiveSourceFilteringSyntax() {
+    public void supportElasticsearchPermissiveSourceFilteringSyntax() throws IOException {
         String query = "{\"query\" : { \"term\" : { \"name\" : \"KangSungJeon\" } }, \"_source\": false}";
         String includePatternItem1 = "SeolaIncludeFieldName";
         String excludePatternItem1 = "SeolaExcludeField.*";
@@ -160,18 +156,18 @@ public class SearchTest {
                 .addSourceExcludePattern(excludePatternItem1)
                 .build();
 
-        JsonParser parser = new JsonParser();
-        JsonElement parsed = parser.parse(search.getData(new Gson()).toString());
-        JsonObject obj = parsed.getAsJsonObject();
-        JsonObject source = obj.getAsJsonObject("_source");
+        final ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode parsed = objectMapper.readTree(search.getData(objectMapper));
+        JsonNode obj = parsed;
+        JsonNode source = obj.get("_source");
 
-        JsonArray includePattern = source.getAsJsonArray("include");
+        JsonNode includePattern = source.get("include");
         assertEquals(1, includePattern.size());
-        assertEquals(includePatternItem1, includePattern.get(0).getAsString());
+        assertEquals(includePatternItem1, includePattern.get(0).asText());
 
-        JsonArray excludePattern = source.getAsJsonArray("exclude");
+        JsonNode excludePattern = source.get("exclude");
         assertEquals(1, excludePattern.size());
-        assertEquals(excludePatternItem1, excludePattern.get(0).getAsString());
+        assertEquals(excludePatternItem1, excludePattern.get(0).asText());
 
         query = "{\"query\" : { \"term\" : { \"name\" : \"KangSungJeon\" } }, \"_source\": [\"includeFieldName1\", \"includeFieldName2\"]}";
 
@@ -180,62 +176,62 @@ public class SearchTest {
                 .addSourceExcludePattern(excludePatternItem1)
                 .build();
 
-        parsed = parser.parse(search.getData(new Gson()).toString());
-        obj = parsed.getAsJsonObject();
-        source = obj.getAsJsonObject("_source");
+        parsed = objectMapper.readTree(search.getData(objectMapper));
+        obj = parsed;
+        source = obj.get("_source");
 
-        includePattern = source.getAsJsonArray("include");
+        includePattern = source.get("include");
         assertEquals(3, includePattern.size());
-        assertEquals("includeFieldName1", includePattern.get(0).getAsString());
-        assertEquals("includeFieldName2", includePattern.get(1).getAsString());
-        assertEquals(includePatternItem1, includePattern.get(2).getAsString());
+        assertEquals("includeFieldName1", includePattern.get(0).asText());
+        assertEquals("includeFieldName2", includePattern.get(1).asText());
+        assertEquals(includePatternItem1, includePattern.get(2).asText());
 
-        excludePattern = source.getAsJsonArray("exclude");
+        excludePattern = source.get("exclude");
         assertEquals(1, excludePattern.size());
-        assertEquals(excludePatternItem1, excludePattern.get(0).getAsString());
+        assertEquals(excludePatternItem1, excludePattern.get(0).asText());
     }
 
     @Test
-    public void sortTest() {
+    public void sortTest() throws IOException {
         String query = "{\"query\" : { \"term\" : { \"name\" : \"Milano\" } }}";
         Action search = new Search.Builder(query)
                 .addSort(Arrays.asList(sortByPopulationAsc, sortByPopulationDesc, sortByPopulation)).build();
 
-        JsonParser parser = new JsonParser();
-        JsonElement parsed = parser.parse(search.getData(new Gson()).toString());
-        JsonObject obj = parsed.getAsJsonObject();
-        JsonArray sort = obj.getAsJsonArray("sort");
+        final ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode parsed = objectMapper.readTree(search.getData(objectMapper));
+        JsonNode obj = parsed;
+        JsonNode sort = obj.get("sort");
 
         assertEquals(3, sort.size());
 
         // sort 0
-        JsonObject test = sort.get(0).getAsJsonObject();
+        JsonNode test = sort.get(0);
         assertTrue(test.has("population"));
 
-        test = test.getAsJsonObject("population");
+        test = test.get("population");
         assertTrue(test.has("order"));
-        assertEquals("asc", test.get("order").getAsString());
+        assertEquals("asc", test.get("order").asText());
 
         // sort 1
-        test = sort.get(1).getAsJsonObject();
+        test = sort.get(1);
         assertTrue(test.has("population"));
 
-        test = test.getAsJsonObject("population");
+        test = test.get("population");
         assertTrue(test.has("order"));
-        assertEquals("desc", test.get("order").getAsString());
+        assertEquals("desc", test.get("order").asText());
 
         // sort 2
-        test = sort.get(2).getAsJsonObject();
+        test = sort.get(2);
         assertTrue(test.has("population"));
 
-        test = test.getAsJsonObject("population");
+        test = test.get("population");
         assertFalse(test.has("order"));
         assertFalse(test.has("order"));
     }
 
     @Test
-    public void addSortShouldNotOverrideExistingSortDefinitions() throws JSONException {
-        JsonArray sortClause = buildSortClause(
+    public void addSortShouldNotOverrideExistingSortDefinitions() throws JSONException, IOException {
+        JsonNode sortClause = buildSortClause(
                 "{\"query\" : { \"term\" : { \"name\" : \"Milano\" } }, \"sort\": [{\"existing\": { \"order\": \"desc\" }}]}",
                 Arrays.asList(sortByPopulationAsc, sortByPopulationDesc)
         );
@@ -249,8 +245,8 @@ public class SearchTest {
     }
 
     @Test
-    public void supportElasticsearchPermissiveSortSyntax() throws JSONException {
-        JsonArray sortClause = buildSortClause(
+    public void supportElasticsearchPermissiveSortSyntax() throws IOException, JSONException {
+        JsonNode sortClause = buildSortClause(
                 "{\"query\" : { \"term\" : { \"name\" : \"Milano\" } }, \"sort\": \"existing\"}",
                 Arrays.asList(sortByPopulationAsc)
         );
@@ -320,14 +316,12 @@ public class SearchTest {
         assertNotEquals(search1, search1Duplicate);
     }
 
-    private JsonArray buildSortClause(String query, List<Sort> sorts) {
+    private JsonNode buildSortClause(String query, List<Sort> sorts) throws IOException {
         Action search = new Search.Builder(query).addSort(sorts).build();
 
-        JsonParser parser = new JsonParser();
-        Gson gson = new Gson();
-        JsonElement parsed = parser.parse(search.getData(gson));
-        JsonObject obj = parsed.getAsJsonObject();
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode parsed = objectMapper.readTree(search.getData(objectMapper));
 
-        return obj.getAsJsonArray("sort");
+        return parsed.get("sort");
     }
 }

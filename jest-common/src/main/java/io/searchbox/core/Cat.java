@@ -1,15 +1,14 @@
 package io.searchbox.core;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Joiner;
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.google.gson.JsonSyntaxException;
-
 import io.searchbox.action.AbstractAction;
 import io.searchbox.action.AbstractMultiIndexActionBuilder;
 import io.searchbox.action.AbstractMultiTypeActionBuilder;
+
+import java.io.IOException;
 
 /**
  * @author Bartosz Polnik
@@ -41,23 +40,25 @@ public class Cat extends AbstractAction<CatResult> {
     }
 
     @Override
-    public CatResult createNewElasticSearchResult(String responseBody, int statusCode, String reasonPhrase, Gson gson) {
-        return createNewElasticSearchResult(new CatResult(gson), responseBody, statusCode, reasonPhrase, gson);
+    public CatResult createNewElasticSearchResult(String responseBody, int statusCode, String reasonPhrase, ObjectMapper objectMapper) throws IOException {
+        return createNewElasticSearchResult(new CatResult(objectMapper), responseBody, statusCode, reasonPhrase, objectMapper);
     }
 
     @Override
-    protected JsonObject parseResponseBody(String responseBody) {
+    protected ObjectNode parseResponseBody(String responseBody, ObjectMapper objectMapper) throws IOException {
         if (responseBody == null || responseBody.trim().isEmpty()) {
-            return new JsonObject();
+            return objectMapper.createObjectNode();
         }
 
-        JsonElement parsed = new JsonParser().parse(responseBody);
-        if (parsed.isJsonArray()) {
-            JsonObject result = new JsonObject();
-            result.add(PATH_TO_RESULT, parsed.getAsJsonArray());
+        final JsonNode parsed = objectMapper.readTree(responseBody);
+
+        if (parsed.isArray()) {
+            ObjectNode result = objectMapper.createObjectNode();
+            result.set(PATH_TO_RESULT, parsed);
             return result;
         } else {
-            throw new JsonSyntaxException("Cat response did not contain a JSON Array");
+            // TODO: Specific exception?
+            throw new IllegalArgumentException("Cat response did not contain a JSON Array");
         }
     }
 

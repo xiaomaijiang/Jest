@@ -1,8 +1,7 @@
 package io.searchbox.indices;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.io.Resources;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import io.searchbox.action.Action;
 import io.searchbox.client.JestResult;
 import io.searchbox.common.AbstractIntegrationTest;
@@ -53,9 +52,9 @@ public class AnalyzeIntegrationTest extends AbstractIntegrationTest {
         JestResult result = client.execute(action);
         assertTrue(result.getErrorMessage(), result.isSucceeded());
 
-        JsonObject resultObj = result.getJsonObject();
+        JsonNode resultObj = result.getJsonObject();
         assertNotNull(resultObj);
-        JsonArray tokens = resultObj.getAsJsonArray("tokens");
+        JsonNode tokens = resultObj.get("tokens");
         assertNotNull(tokens);
     }
 
@@ -73,10 +72,10 @@ public class AnalyzeIntegrationTest extends AbstractIntegrationTest {
         JestResult result = client.execute(action);
         assertTrue(result.getErrorMessage(), result.isSucceeded());
 
-        JsonObject resultObj = result.getJsonObject();
+        JsonNode resultObj = result.getJsonObject();
         assertNotNull(resultObj);
-        JsonArray tokens = resultObj.getAsJsonArray("tokens");
-        assertEquals(numberOfExpectedTokens, tokens.getAsJsonArray().size());
+        JsonNode tokens = resultObj.get("tokens");
+        assertEquals(numberOfExpectedTokens, tokens.size());
     }
 
 }

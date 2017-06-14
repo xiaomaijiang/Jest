@@ -1,12 +1,16 @@
 package io.searchbox.indices.script;
 
 import com.google.common.io.CharStreams;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import io.searchbox.action.AbstractAction;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.charset.Charset;
+import java.util.Collections;
+import java.util.Map;
 
 public class CreateIndexedScript extends AbstractIndexedScript {
 
@@ -31,7 +35,7 @@ public class CreateIndexedScript extends AbstractIndexedScript {
 
     public static class Builder extends AbstractIndexedScript.Builder<CreateIndexedScript, Builder> {
 
-        private JsonElement payload;
+        private Map<String, String> payload;
 
         public Builder(String scriptName) {
             super(scriptName);
@@ -66,9 +70,7 @@ public class CreateIndexedScript extends AbstractIndexedScript {
         }
 
         private void createPayload(String source) {
-            JsonObject jsonObject = new JsonObject();
-            jsonObject.addProperty("script", source);
-            payload = jsonObject;
+            payload = Collections.singletonMap("script", source);
         }
 
     }

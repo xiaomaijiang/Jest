@@ -1,6 +1,6 @@
 package io.searchbox.core.search.aggregation;
 
-import com.google.gson.JsonObject;
+import com.fasterxml.jackson.databind.JsonNode;
 
 import java.util.Objects;
 
@@ -11,9 +11,9 @@ import java.util.Objects;
 public abstract class Aggregation {
 
     protected String name;
-    protected JsonObject jsonRoot;
+    protected JsonNode jsonRoot;
 
-    public Aggregation(String name, JsonObject jsonRoot) {
+    public Aggregation(String name, JsonNode jsonRoot) {
         this.name = name;
         this.jsonRoot = jsonRoot;
     }

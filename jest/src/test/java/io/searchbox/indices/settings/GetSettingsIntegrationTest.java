@@ -1,6 +1,6 @@
 package io.searchbox.indices.settings;
 
-import com.google.gson.JsonObject;
+import com.fasterxml.jackson.databind.JsonNode;
 import io.searchbox.client.JestResult;
 import io.searchbox.common.AbstractIntegrationTest;
 import org.elasticsearch.test.ESIntegTestCase;
@@ -27,9 +27,9 @@ public class GetSettingsIntegrationTest extends AbstractIntegrationTest {
 
         assertTrue(result.isSucceeded());
         System.out.println("result.getJsonString() = " + result.getJsonString());
-        JsonObject json = result.getJsonObject();
-        assertNotNull(json.getAsJsonObject(index));
-        assertNotNull(json.getAsJsonObject(index).getAsJsonObject("settings"));
+        JsonNode json = result.getJsonObject();
+        assertNotNull(json.get(index));
+        assertNotNull(json.get(index).get("settings"));
     }
 
     @Test

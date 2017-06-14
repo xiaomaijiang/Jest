@@ -1,10 +1,14 @@
 package io.searchbox.core.search.aggregation;
 
-import com.google.gson.JsonObject;
+import com.fasterxml.jackson.databind.JsonNode;
 
 import java.util.Objects;
 
-import static io.searchbox.core.search.aggregation.AggregationField.*;
+import static io.searchbox.core.search.aggregation.AggregationField.BOTTOM_RIGHT;
+import static io.searchbox.core.search.aggregation.AggregationField.BOUNDS;
+import static io.searchbox.core.search.aggregation.AggregationField.LAT;
+import static io.searchbox.core.search.aggregation.AggregationField.LON;
+import static io.searchbox.core.search.aggregation.AggregationField.TOP_LEFT;
 
 /**
  * @author cfstout
@@ -18,17 +22,17 @@ public class GeoBoundsAggregation extends MetricAggregation {
     private Double bottomRightLat;
     private Double bottomRightLon;
 
-    public GeoBoundsAggregation(String name, JsonObject geoBoundsAggregation) {
+    public GeoBoundsAggregation(String name, JsonNode geoBoundsAggregation) {
         super(name, geoBoundsAggregation);
         if (geoBoundsAggregation.has(String.valueOf(BOUNDS))) {
-            JsonObject bounds = geoBoundsAggregation.getAsJsonObject(String.valueOf(BOUNDS));
-            JsonObject topLeft = bounds.getAsJsonObject(String.valueOf(TOP_LEFT));
-            JsonObject bottomRight = bounds.getAsJsonObject(String.valueOf(BOTTOM_RIGHT));
+            JsonNode bounds = geoBoundsAggregation.get(String.valueOf(BOUNDS));
+            JsonNode topLeft = bounds.get(String.valueOf(TOP_LEFT));
+            JsonNode bottomRight = bounds.get(String.valueOf(BOTTOM_RIGHT));
 
-            topLeftLat = topLeft.get(String.valueOf(LAT)).getAsDouble();
-            topLeftLon = topLeft.get(String.valueOf(LON)).getAsDouble();
-            bottomRightLat = bottomRight.get(String.valueOf(LAT)).getAsDouble();
-            bottomRightLon = bottomRight.get(String.valueOf(LON)).getAsDouble();
+            topLeftLat = topLeft.get(String.valueOf(LAT)).asDouble();
+            topLeftLon = topLeft.get(String.valueOf(LON)).asDouble();
+            bottomRightLat = bottomRight.get(String.valueOf(LAT)).asDouble();
+            bottomRightLon = bottomRight.get(String.valueOf(LON)).asDouble();
         }
     }
 

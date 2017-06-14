@@ -1,6 +1,6 @@
 package io.searchbox.core.search.aggregation;
 
-import com.google.gson.JsonObject;
+import com.fasterxml.jackson.databind.JsonNode;
 
 import java.util.Objects;
 
@@ -11,7 +11,7 @@ public class ScriptedMetricAggregation extends SingleValueAggregation {
 
     public static final String TYPE = "scripted_metric";
 
-    public ScriptedMetricAggregation(String name, JsonObject scriptedMetricAggregation) {
+    public ScriptedMetricAggregation(String name, JsonNode scriptedMetricAggregation) {
         super(name, scriptedMetricAggregation);
     }
 

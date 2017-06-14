@@ -1,17 +1,16 @@
 package io.searchbox.core.search.aggregation;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.searchbox.core.search.aggregation.TermsAggregation.Entry;
+import org.junit.Test;
+
+import java.io.IOException;
+import java.util.List;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-
-import java.util.List;
-
-import org.junit.Test;
-
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-
-import io.searchbox.core.search.aggregation.TermsAggregation.Entry;
 
 public class TermsAggregationTermTest {
 
@@ -43,9 +42,9 @@ public class TermsAggregationTermTest {
 
 
 	@Test
-	public void testParseBuckets() {
+	public void testParseBuckets() throws IOException {
 
-		JsonObject termsAggregationJson = new Gson().fromJson(termsAggregationContent, JsonObject.class);
+		JsonNode termsAggregationJson = new ObjectMapper().readTree(termsAggregationContent);
 		TermsAggregation termsAggregation = new TermsAggregation("termsAggregation", termsAggregationJson);
 		List<Entry> buckets = termsAggregation.getBuckets();
 		assertNotNull(buckets);

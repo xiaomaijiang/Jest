@@ -1,6 +1,6 @@
 package io.searchbox.core.search.aggregation;
 
-import com.google.gson.JsonObject;
+import com.fasterxml.jackson.databind.JsonNode;
 
 import java.util.Objects;
 
@@ -13,10 +13,10 @@ public abstract class SingleValueAggregation extends MetricAggregation {
 
     private Double value;
 
-    protected SingleValueAggregation(String name, JsonObject singleValueAggregation) {
+    protected SingleValueAggregation(String name, JsonNode singleValueAggregation) {
         super(name, singleValueAggregation);
-        if(singleValueAggregation.has(String.valueOf(VALUE)) && !singleValueAggregation.get(String.valueOf(VALUE)).isJsonNull()) {
-            value = singleValueAggregation.get(String.valueOf(VALUE)).getAsDouble();
+        if(singleValueAggregation.has(String.valueOf(VALUE)) && !singleValueAggregation.get(String.valueOf(VALUE)).isNull()) {
+            value = singleValueAggregation.get(String.valueOf(VALUE)).asDouble();
         }
     }
 

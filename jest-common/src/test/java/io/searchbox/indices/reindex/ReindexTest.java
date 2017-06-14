@@ -1,7 +1,7 @@
 package io.searchbox.indices.reindex;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
-import com.google.gson.GsonBuilder;
 import org.junit.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 
@@ -44,7 +44,7 @@ public class ReindexTest {
 		                             .conflicts("proceed")
 		                             .build();
 
-		String generatedData = reindex.getData(new GsonBuilder().create());
+		String generatedData = reindex.getData(new ObjectMapper());
 		
 		String expectedData = "{\"conflicts\":\"proceed\",\"dest\":{\"index\":\"destIndex\"},\"source\":{\"index\":\"sourceIndex\"}}";
 		JSONAssert.assertEquals(expectedData, generatedData,false);

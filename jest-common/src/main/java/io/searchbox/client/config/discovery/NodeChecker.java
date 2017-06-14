@@ -1,12 +1,12 @@
 package io.searchbox.client.config.discovery;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.AbstractScheduledService;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import io.searchbox.client.JestClient;
 import io.searchbox.client.JestResult;
 import io.searchbox.client.config.ClientConfig;
@@ -16,7 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.LinkedHashSet;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -82,17 +81,15 @@ public class NodeChecker extends AbstractScheduledService {
         if (result.isSucceeded()) {
             LinkedHashSet<String> httpHosts = new LinkedHashSet<String>();
 
-            JsonObject jsonMap = result.getJsonObject();
-            JsonObject nodes = (JsonObject) jsonMap.get("nodes");
+            JsonNode jsonMap = result.getJsonObject();
+            JsonNode nodes = jsonMap.get("nodes");
             if (nodes != null) {
-                for (Entry<String, JsonElement> entry : nodes.entrySet()) {
-                    JsonObject host = entry.getValue().getAsJsonObject();
-
-                    // get as a JsonElement first as some nodes in the cluster may not have an http_address
+                for (JsonNode host : nodes) {
+                    // get as a JsonNode first as some nodes in the cluster may not have an http_address
                     if (host.has(HTTP_ADDRESS_KEY)) {
-                        JsonElement addressElement = host.get(HTTP_ADDRESS_KEY);
-                        if (!addressElement.isJsonNull()) {
-                            String httpAddress = getHttpAddress(addressElement.getAsString());
+                        JsonNode addressElement = host.get(HTTP_ADDRESS_KEY);
+                        if (!addressElement.isNull()) {
+                            String httpAddress = getHttpAddress(addressElement.asText());
                             if (httpAddress != null) {
                                 httpHosts.add(httpAddress);
                             }
@@ -116,13 +113,13 @@ public class NodeChecker extends AbstractScheduledService {
         }
     }
 
-    private String acquirePublishAddress(JsonObject json) {
+    private String acquirePublishAddress(JsonNode json) {
         if (json.has("http")) {
-            JsonObject http = (JsonObject) json.get("http");
+            ObjectNode http = (ObjectNode) json.get("http");
             if (http.has(PUBLISH_ADDRESS_KEY)) {
-                JsonElement publishAddress = http.get(PUBLISH_ADDRESS_KEY);
-                if (!publishAddress.isJsonNull()) {
-                    return getHttpAddress(publishAddress.getAsString());
+                JsonNode publishAddress = http.get(PUBLISH_ADDRESS_KEY);
+                if (!publishAddress.isNull()) {
+                    return getHttpAddress(publishAddress.asText());
                 }
             }
         }

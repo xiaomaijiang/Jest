@@ -1,7 +1,7 @@
 package io.searchbox.client.config.discovery;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
-import com.google.gson.Gson;
 import io.searchbox.action.Action;
 import io.searchbox.client.JestClient;
 import io.searchbox.client.JestResult;
@@ -49,7 +49,7 @@ public class NodeCheckerTest {
                 .defaultSchemeForDiscoveredNodes("https")
                 .build());
 
-        JestResult result = new JestResult(new Gson());
+        JestResult result = new JestResult(new ObjectMapper());
         result.setJsonMap(ImmutableMap.<String, Object>of(
                 "ok", "true",
                 "nodes", ImmutableMap.of(
@@ -77,7 +77,7 @@ public class NodeCheckerTest {
     public void testWithResolvedWithoutHostnameAddress() throws Exception {
         NodeChecker nodeChecker = new NodeChecker(jestClient, clientConfig);
 
-        JestResult result = new JestResult(new Gson());
+        JestResult result = new JestResult(new ObjectMapper());
         result.setJsonMap(ImmutableMap.<String, Object>of(
                 "ok", "true",
                 "nodes", ImmutableMap.of(
@@ -105,7 +105,7 @@ public class NodeCheckerTest {
     public void testWithResolvedWithHostnameAddress() throws Exception {
         NodeChecker nodeChecker = new NodeChecker(jestClient, clientConfig);
 
-        JestResult result = new JestResult(new Gson());
+        JestResult result = new JestResult(new ObjectMapper());
         result.setJsonMap(ImmutableMap.<String, Object>of(
                 "ok", "true",
                 "nodes", ImmutableMap.of(
@@ -133,7 +133,7 @@ public class NodeCheckerTest {
     public void testWithUnresolvedAddress() throws Exception {
         NodeChecker nodeChecker = new NodeChecker(jestClient, clientConfig);
 
-        JestResult result = new JestResult(new Gson());
+        JestResult result = new JestResult(new ObjectMapper());
         result.setJsonMap(ImmutableMap.<String, Object>of(
                 "ok", "true",
                 "nodes", ImmutableMap.of(
@@ -161,7 +161,7 @@ public class NodeCheckerTest {
     public void testWithInvalidUnresolvedAddress() throws Exception {
         NodeChecker nodeChecker = new NodeChecker(jestClient, clientConfig);
 
-        JestResult result = new JestResult(new Gson());
+        JestResult result = new JestResult(new ObjectMapper());
         result.setJsonMap(ImmutableMap.<String, Object>of(
                 "ok", "true",
                 "nodes", ImmutableMap.of(
@@ -188,7 +188,7 @@ public class NodeCheckerTest {
     public void testWithInvalidResolvedAddress() throws Exception {
         NodeChecker nodeChecker = new NodeChecker(jestClient, clientConfig);
 
-        JestResult result = new JestResult(new Gson());
+        JestResult result = new JestResult(new ObjectMapper());
         result.setJsonMap(ImmutableMap.<String, Object>of(
                 "ok", "true",
                 "nodes", ImmutableMap.of(
@@ -232,7 +232,7 @@ public class NodeCheckerTest {
     @Test
     public void testNodesInfoFailureUsesBootstrapServerList() throws Exception {
         NodeChecker nodeChecker = new NodeChecker(jestClient, clientConfig);
-        JestResult result = new JestResult(new Gson());
+        JestResult result = new JestResult(new ObjectMapper());
         result.setSucceeded(false);
         when(jestClient.execute(isA(Action.class))).thenReturn(result);
 
@@ -252,7 +252,7 @@ public class NodeCheckerTest {
     public void testNodesInfoExceptionRemovesServerFromList() throws Exception {
         NodeChecker nodeChecker = new NodeChecker(jestClient, clientConfig);
 
-        JestResult result = new JestResult(new Gson());
+        JestResult result = new JestResult(new ObjectMapper());
         result.setJsonMap(ImmutableMap.<String, Object>of(
                 "ok", "true",
                 "nodes", ImmutableMap.of(
@@ -333,7 +333,7 @@ public class NodeCheckerTest {
 
     @Test
     public void testWithPublishAddress() throws Exception {
-        JestResult result = new JestResult(new Gson());
+        JestResult result = new JestResult(new ObjectMapper());
         result.setJsonMap(ImmutableMap.<String, Object>of(
             "ok", "true",
             "nodes", ImmutableMap.of(

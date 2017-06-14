@@ -1,6 +1,6 @@
 package io.searchbox.core.search.aggregation;
 
-import com.google.gson.JsonObject;
+import com.fasterxml.jackson.databind.JsonNode;
 
 import java.util.Objects;
 
@@ -15,9 +15,9 @@ public class MissingAggregation extends MetricAggregation {
 
     private Long missing;
 
-    public MissingAggregation(String name, JsonObject missingAggregation) {
+    public MissingAggregation(String name, JsonNode missingAggregation) {
         super(name, missingAggregation);
-        missing = missingAggregation.get(String.valueOf(DOC_COUNT)).getAsLong();
+        missing = missingAggregation.get(String.valueOf(DOC_COUNT)).asLong();
     }
 
     public Long getMissing() {

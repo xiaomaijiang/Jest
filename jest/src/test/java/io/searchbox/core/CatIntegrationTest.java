@@ -1,22 +1,20 @@
 package io.searchbox.core;
 
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-
-import com.google.gson.JsonElement;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import io.searchbox.common.AbstractIntegrationTest;
 import org.elasticsearch.action.admin.indices.alias.IndicesAliasesAction;
 import org.elasticsearch.test.ESIntegTestCase;
 import org.json.JSONException;
 import org.junit.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
-
-import com.google.gson.JsonArray;
-
-import io.searchbox.common.AbstractIntegrationTest;
 import org.skyscreamer.jsonassert.JSONCompare;
 import org.skyscreamer.jsonassert.JSONCompareMode;
+
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author Bartosz Polnik
@@ -30,7 +28,7 @@ public class CatIntegrationTest extends AbstractIntegrationTest {
     @Test
     public void shouldReturnEmptyPlainTextForIndices() throws IOException {
         CatResult result = client.execute(new Cat.IndicesBuilder().build());
-        assertEquals(new JsonArray(), result.getJsonObject().get(result.getPathToResult()));
+        assertEquals(JsonNodeFactory.instance.arrayNode(0), result.getJsonObject().get(result.getPathToResult()));
         assertArrayEquals(new String[0][0], result.getPlainText());
     }
 
@@ -96,13 +94,13 @@ public class CatIntegrationTest extends AbstractIntegrationTest {
         ensureSearchable(INDEX2);
 
         CatResult catResult = client.execute(new Cat.ShardsBuilder().setParameter("h", "index,docs").build());
-        JsonArray shards = catResult.getJsonObject().get("result").getAsJsonArray();
+        JsonNode shards = catResult.getJsonObject().get("result");
 
         assertEquals(shards.size(), getNumShards(INDEX).totalNumShards + getNumShards(INDEX2).totalNumShards);
 
         int index1Count = 0;
         int index2Count = 0;
-        for (JsonElement shard : shards) {
+        for (JsonNode shard : shards) {
             index1Count += JSONCompare.compareJSON("{\"index\":\"" + INDEX + "\",\"docs\":\"0\"}", shard.toString(), JSONCompareMode.LENIENT).passed() ? 1 : 0;
             index2Count += JSONCompare.compareJSON("{\"index\":\"" + INDEX2 + "\",\"docs\":\"0\"}", shard.toString(), JSONCompareMode.LENIENT).passed() ? 1 : 0;
         }
@@ -120,11 +118,11 @@ public class CatIntegrationTest extends AbstractIntegrationTest {
         ensureSearchable(INDEX2);
 
         CatResult catResult = client.execute(new Cat.ShardsBuilder().addIndex(INDEX).setParameter("h", "index,docs").build());
-        JsonArray shards = catResult.getJsonObject().get("result").getAsJsonArray();
+        JsonNode shards = catResult.getJsonObject().get("result");
 
         assertEquals(shards.size(), getNumShards(INDEX).totalNumShards);
 
-        for (JsonElement shard : shards) {
+        for (JsonNode shard : shards) {
             JSONAssert.assertEquals("{\"index\":\"catintegrationindex\",\"docs\":\"0\"}", shard.toString(), false);
         }
     }
@@ -132,12 +130,12 @@ public class CatIntegrationTest extends AbstractIntegrationTest {
     @Test
     public void catNodes() throws IOException {
         CatResult catResult = client.execute(new Cat.NodesBuilder().setParameter("h", "name").build());
-        JsonArray nodes = catResult.getJsonObject().get("result").getAsJsonArray();
+        JsonNode nodes = catResult.getJsonObject().get("result");
 
         Set<String> expectedNodeNames = new HashSet<>(Arrays.asList(internalCluster().getNodeNames()));
         Set<String> actualNodeNames = new HashSet<>();
-        for (JsonElement node : nodes) {
-            actualNodeNames.add(node.getAsJsonObject().get("name").getAsString());
+        for (JsonNode node : nodes) {
+            actualNodeNames.add(node.get("name").asText());
         }
 
         assertEquals(actualNodeNames, expectedNodeNames);

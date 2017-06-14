@@ -2,6 +2,8 @@ package io.searchbox.core;
 
 import org.junit.Test;
 
+import java.io.IOException;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
@@ -11,7 +13,7 @@ import static org.junit.Assert.assertNotEquals;
 public class ExplainTest {
 
     @Test
-    public void explain() {
+    public void explain() throws IOException {
         Explain explain = new Explain.Builder("twitter", "tweet", "1", "query").build();
         assertEquals("GET", explain.getRestMethodName());
         assertEquals("twitter/tweet/1/_explain", explain.getURI());

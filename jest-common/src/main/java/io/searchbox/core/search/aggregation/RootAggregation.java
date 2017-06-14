@@ -1,6 +1,6 @@
 package io.searchbox.core.search.aggregation;
 
-import com.google.gson.JsonObject;
+import com.fasterxml.jackson.databind.JsonNode;
 
 import java.util.Objects;
 
@@ -12,7 +12,7 @@ import java.util.Objects;
  */
 public class RootAggregation extends MetricAggregation {
 
-    public RootAggregation(String name, JsonObject root) {
+    public RootAggregation(String name, JsonNode root) {
         super(name, root);
     }
 

@@ -1,15 +1,15 @@
 package io.searchbox.core;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.searchbox.client.JestResult;
 
 /**
  * @author Bartosz Polnik
  */
 public class DocumentResult extends JestResult {
-    public DocumentResult(Gson gson) {
-        super(gson);
+    public DocumentResult(ObjectMapper objectMapper) {
+        super(objectMapper);
     }
 
     public String getIndex() {
@@ -28,19 +28,19 @@ public class DocumentResult extends JestResult {
         return getAsLong(jsonObject.get("_version"));
     }
 
-    private String getAsString(JsonElement jsonElement) {
+    private String getAsString(JsonNode jsonElement) {
         if(jsonElement == null) {
             return null;
         } else {
-            return jsonElement.getAsString();
+            return jsonElement.asText();
         }
     }
 
-    private Long getAsLong(JsonElement jsonElement) {
+    private Long getAsLong(JsonNode jsonElement) {
         if(jsonElement == null) {
             return null;
         } else {
-            return jsonElement.getAsLong();
+            return jsonElement.asLong();
         }
     }
 

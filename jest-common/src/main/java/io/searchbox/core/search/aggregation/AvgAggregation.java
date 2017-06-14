@@ -1,6 +1,6 @@
 package io.searchbox.core.search.aggregation;
 
-import com.google.gson.JsonObject;
+import com.fasterxml.jackson.databind.JsonNode;
 
 /**
  * @author cfstout
@@ -9,7 +9,7 @@ public class AvgAggregation extends SingleValueAggregation {
 
     public static final String TYPE = "avg";
 
-    public AvgAggregation(String name, JsonObject avgAggregation) {
+    public AvgAggregation(String name, JsonNode avgAggregation) {
         super(name, avgAggregation);
     }
 

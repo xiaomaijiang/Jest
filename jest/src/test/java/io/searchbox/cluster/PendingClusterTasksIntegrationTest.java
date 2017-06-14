@@ -16,7 +16,7 @@ public class PendingClusterTasksIntegrationTest extends AbstractIntegrationTest 
         JestResult result = client.execute(pendingClusterTasks);
         assertTrue(result.getErrorMessage(), result.isSucceeded());
 
-        assertTrue(result.getJsonObject().get("tasks").isJsonArray());
-        assertTrue(Iterables.isEmpty(result.getJsonObject().getAsJsonArray("tasks")));
+        assertTrue(result.getJsonObject().get("tasks").isArray());
+        assertTrue(Iterables.isEmpty(result.getJsonObject().get("tasks")));
     }
 }

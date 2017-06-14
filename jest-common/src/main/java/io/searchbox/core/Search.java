@@ -1,23 +1,22 @@
 package io.searchbox.core;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Objects;
-
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
-import com.google.gson.JsonSyntaxException;
-
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.TextNode;
 import io.searchbox.action.AbstractAction;
 import io.searchbox.action.AbstractMultiTypeActionBuilder;
 import io.searchbox.core.search.sort.Sort;
 import io.searchbox.params.Parameters;
 import io.searchbox.params.SearchType;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * @author Dogukan Sonmez
@@ -52,8 +51,8 @@ public class Search extends AbstractAction<SearchResult> {
     }
 
     @Override
-    public SearchResult createNewElasticSearchResult(String responseBody, int statusCode, String reasonPhrase, Gson gson) {
-        return createNewElasticSearchResult(new SearchResult(gson), responseBody, statusCode, reasonPhrase, gson);
+    public SearchResult createNewElasticSearchResult(String responseBody, int statusCode, String reasonPhrase, ObjectMapper objectMapper) throws IOException {
+        return createNewElasticSearchResult(new SearchResult(objectMapper), responseBody, statusCode, reasonPhrase, objectMapper);
     }
 
     public String getIndex() {
@@ -80,107 +79,108 @@ public class Search extends AbstractAction<SearchResult> {
     }
 
     @Override
-    public String getData(Gson gson) {
+    public String getData(ObjectMapper objectMapper) throws IOException {
         String data;
         if (sortList.isEmpty() && includePatternList.isEmpty() && excludePatternList.isEmpty()) {
             data = query;
         } else {
-            JsonObject queryObject = gson.fromJson(query, JsonObject.class);
+            ObjectNode queryObject = (ObjectNode) objectMapper.readTree(query);
 
             if (queryObject == null) {
-                queryObject = new JsonObject();
+                queryObject = objectMapper.createObjectNode();
             }
 
             if (!sortList.isEmpty()) {
-                JsonArray sortArray = normalizeSortClause(queryObject);
+                ArrayNode sortArray = normalizeSortClause(queryObject, objectMapper);
 
                 for (Sort sort : sortList) {
-                    sortArray.add(sort.toJsonObject());
+                    sortArray.add(sort.toJsonObject(objectMapper));
                 }
             }
 
             if (!includePatternList.isEmpty() || !excludePatternList.isEmpty()) {
-                JsonObject sourceObject = normalizeSourceClause(queryObject);
+                ObjectNode sourceObject = normalizeSourceClause(queryObject, objectMapper);
 
-                addPatternListToSource(sourceObject, "include", includePatternList);
-                addPatternListToSource(sourceObject, "exclude", excludePatternList);
+                addPatternListToSource(sourceObject, "include", includePatternList, objectMapper);
+                addPatternListToSource(sourceObject, "exclude", excludePatternList, objectMapper);
             }
 
-            data = gson.toJson(queryObject);
+            data = objectMapper.writeValueAsString(queryObject);
         }
         return data;
     }
 
-    private static JsonArray normalizeSortClause(JsonObject queryObject) {
-        JsonArray sortArray;
+    private static ArrayNode normalizeSortClause(ObjectNode queryObject, ObjectMapper objectMapper) {
+        final ArrayNode sortArray;
         if (queryObject.has("sort")) {
-            JsonElement sortElement = queryObject.get("sort");
-            if (sortElement.isJsonArray()) {
-                sortArray = sortElement.getAsJsonArray();
-            } else if (sortElement.isJsonObject()) {
-                sortArray = new JsonArray();
-                sortArray.add(sortElement.getAsJsonObject());
-            } else if (sortElement.isJsonPrimitive() && sortElement.getAsJsonPrimitive().isString()) {
-                String sortField = sortElement.getAsString();
-                sortArray = new JsonArray();
-                queryObject.add("sort", sortArray);
+            JsonNode sortElement = queryObject.get("sort");
+            if (sortElement.isArray()) {
+                sortArray = (ArrayNode) sortElement;
+            } else if (sortElement.isObject()) {
+                sortArray = objectMapper.createArrayNode();
+                sortArray.add(sortElement);
+            } else if (sortElement.isTextual()) {
+                String sortField = sortElement.asText();
+                sortArray = objectMapper.createArrayNode();
+                queryObject.set("sort", sortArray);
                 String order;
                 if ("_score".equals(sortField)) {
                     order = "desc";
                 } else {
                     order = "asc";
                 }
-                JsonObject sortOrder = new JsonObject();
-                sortOrder.add("order", new JsonPrimitive(order));
-                JsonObject sortDefinition = new JsonObject();
-                sortDefinition.add(sortField, sortOrder);
+                ObjectNode sortOrder = objectMapper.createObjectNode();
+                sortOrder.set("order", new TextNode(order));
+                ObjectNode sortDefinition = objectMapper.createObjectNode();
+                sortDefinition.set(sortField, sortOrder);
 
                 sortArray.add(sortDefinition);
             } else {
-                throw new JsonSyntaxException("_source must be an array, an object or a string");
+                // TODO: Specific exception?
+                throw new IllegalArgumentException("_source must be an array, an object or a string");
             }
         } else {
-            sortArray = new JsonArray();
+            sortArray = objectMapper.createArrayNode();
         }
-        queryObject.add("sort", sortArray);
+        queryObject.set("sort", sortArray);
 
         return sortArray;
     }
 
-    private static JsonObject normalizeSourceClause(JsonObject queryObject) {
-        JsonObject sourceObject;
+    private static ObjectNode normalizeSourceClause(ObjectNode queryObject, ObjectMapper objectMapper) {
+        ObjectNode sourceObject;
         if (queryObject.has("_source")) {
-            JsonElement sourceElement = queryObject.get("_source");
+            JsonNode sourceElement = queryObject.get("_source");
 
-            if (sourceElement.isJsonObject()) {
-                sourceObject = sourceElement.getAsJsonObject();
-            } else if (sourceElement.isJsonArray()) {
+            if (sourceElement.isObject()) {
+                sourceObject = (ObjectNode) sourceElement;
+            } else if (sourceElement.isArray()) {
                 // in this case, the values of the array are includes
-                sourceObject = new JsonObject();
-                queryObject.add("_source", sourceObject);
-                sourceObject.add("include", sourceElement.getAsJsonArray());
-            } else if (sourceElement.isJsonPrimitive() && sourceElement.getAsJsonPrimitive().isBoolean()) {
+                sourceObject = objectMapper.createObjectNode();
+                queryObject.set("_source", sourceObject);
+                sourceObject.set("include", sourceElement);
+            } else if (sourceElement.isBoolean()) {
                 // if _source is a boolean, we override the configuration with include/exclude
-                sourceObject = new JsonObject();
+                sourceObject = objectMapper.createObjectNode();
             } else {
-                throw new JsonSyntaxException("_source must be an object, an array or a boolean");
+                throw new IllegalArgumentException("_source must be an object, an array or a boolean");
             }
         } else {
-            sourceObject = new JsonObject();
+            sourceObject = objectMapper.createObjectNode();
         }
-        queryObject.add("_source", sourceObject);
+        queryObject.set("_source", sourceObject);
 
         return sourceObject;
     }
 
-    private static void addPatternListToSource(JsonObject sourceObject, String rule, List<String> patternList) {
+    private static void addPatternListToSource(ObjectNode sourceObject, String rule, List<String> patternList, ObjectMapper objectMapper) {
         if (!patternList.isEmpty()) {
-            JsonArray ruleArray;
+            ArrayNode ruleArray;
             if (sourceObject.has(rule)) {
-                ruleArray = sourceObject.get(rule).getAsJsonArray();
+                ruleArray = (ArrayNode) sourceObject.get(rule);
             } else {
-                ruleArray = new JsonArray();
-                sourceObject.add(rule, ruleArray);
+                ruleArray = objectMapper.createArrayNode();
+                sourceObject.set(rule, ruleArray);
             }
             for (String pattern : patternList) {
                 ruleArray.add(pattern);

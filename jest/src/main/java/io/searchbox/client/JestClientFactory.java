@@ -1,7 +1,7 @@
 package io.searchbox.client;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
-import com.google.gson.Gson;
 import io.searchbox.client.config.HttpClientConfig;
 import io.searchbox.client.config.discovery.NodeChecker;
 import io.searchbox.client.config.idle.HttpReapableConnectionManager;
@@ -62,13 +62,13 @@ public class JestClientFactory {
         client.setHttpClient(createHttpClient(connectionManager));
         client.setAsyncClient(createAsyncHttpClient(asyncConnectionManager));
 
-        // set custom gson instance
-        Gson gson = httpClientConfig.getGson();
-        if (gson == null) {
-            log.info("Using default GSON instance");
+        // set custom ObjectMapper instance
+        ObjectMapper objectMapper = httpClientConfig.getObjectMapper();
+        if (objectMapper == null) {
+            log.info("Using default ObjectMapper instance");
         } else {
-            log.info("Using custom GSON instance");
-            client.setGson(gson);
+            log.info("Using custom ObjectMapper instance");
+            client.setObjectMapper(objectMapper);
         }
 
         // set discovery (should be set after setting the httpClient on jestClient)

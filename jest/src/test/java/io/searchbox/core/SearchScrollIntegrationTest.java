@@ -1,7 +1,6 @@
 package io.searchbox.core;
 
-import com.google.gson.JsonArray;
-
+import com.fasterxml.jackson.databind.JsonNode;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.test.ESIntegTestCase;
@@ -46,27 +45,27 @@ public class SearchScrollIntegrationTest extends AbstractIntegrationTest {
                 .build();
         JestResult result = client.execute(search);
         assertTrue(result.getErrorMessage(), result.isSucceeded());
-        JsonArray hits = result.getJsonObject().getAsJsonObject("hits").getAsJsonArray("hits");
+        JsonNode hits = result.getJsonObject().path("hits").path("hits");
         assertEquals(
                 "only 1 document should be returned",
                 1,
                 hits.size()
         );
 
-        String scrollId = result.getJsonObject().get("_scroll_id").getAsString();
+        String scrollId = result.getJsonObject().get("_scroll_id").asText();
         for (int i = 1; i < 3; i++) {
             SearchScroll scroll = new SearchScroll.Builder(scrollId, "5m")
                     .setParameter(Parameters.SIZE, 1).build();
             result = client.execute(scroll);
             assertTrue(result.getErrorMessage(), result.isSucceeded());
             JSONAssert.assertEquals("{\"code\":\"" + i + "\"}", result.getSourceAsString(), false);
-            hits = result.getJsonObject().getAsJsonObject("hits").getAsJsonArray("hits");
+            hits = result.getJsonObject().path("hits").path("hits");
             assertEquals(
                     "only 1 document should be returned",
                     1,
                     hits.size()
             );
-            scrollId = result.getJsonObject().getAsJsonPrimitive("_scroll_id").getAsString();
+            scrollId = result.getJsonObject().path("_scroll_id").asText();
         }
 
         SearchScroll scroll = new SearchScroll.Builder(scrollId, "5m").build();
@@ -75,7 +74,7 @@ public class SearchScrollIntegrationTest extends AbstractIntegrationTest {
         assertEquals(
                 "no results should be left to scroll at this point",
                 0,
-                result.getJsonObject().getAsJsonObject("hits").getAsJsonArray("hits").size()
+                result.getJsonObject().path("hits").path("hits").size()
         );
 
         // clear a single scroll id
@@ -104,27 +103,27 @@ public class SearchScrollIntegrationTest extends AbstractIntegrationTest {
             .build();
         JestResult result = client.execute(search);
         assertTrue(result.getErrorMessage(), result.isSucceeded());
-        JsonArray hits = result.getJsonObject().getAsJsonObject("hits").getAsJsonArray("hits");
+        JsonNode hits = result.getJsonObject().path("hits").path("hits");
         assertEquals(
             "only 1 document should be returned",
             1,
             hits.size()
         );
 
-        String scrollId = result.getJsonObject().get("_scroll_id").getAsString();
+        String scrollId = result.getJsonObject().get("_scroll_id").asText();
         for (int i = 1; i < 3; i++) {
             SearchScroll scroll = new SearchScroll.Builder(scrollId, "5m")
                 .setParameter(Parameters.SIZE, 1).build();
             result = client.execute(scroll);
             assertTrue(result.getErrorMessage(), result.isSucceeded());
             JSONAssert.assertEquals("{\"code\":\"" + i + "\"}", result.getSourceAsString(), false);
-            hits = result.getJsonObject().getAsJsonObject("hits").getAsJsonArray("hits");
+            hits = result.getJsonObject().path("hits").path("hits");
             assertEquals(
                 "only 1 document should be returned",
                 1,
                 hits.size()
             );
-            scrollId = result.getJsonObject().getAsJsonPrimitive("_scroll_id").getAsString();
+            scrollId = result.getJsonObject().path("_scroll_id").asText();
         }
 
         SearchScroll scroll = new SearchScroll.Builder(scrollId, "5m").build();
@@ -133,7 +132,7 @@ public class SearchScrollIntegrationTest extends AbstractIntegrationTest {
         assertEquals(
             "no results should be left to scroll at this point",
             0,
-            result.getJsonObject().getAsJsonObject("hits").getAsJsonArray("hits").size()
+            result.getJsonObject().path("hits").path("hits").size()
         );
 
         // clear all scroll ids

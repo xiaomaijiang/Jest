@@ -1,6 +1,6 @@
 package io.searchbox.core.search.aggregation;
 
-import com.google.gson.JsonObject;
+import com.fasterxml.jackson.databind.JsonNode;
 
 import java.util.Objects;
 
@@ -11,7 +11,7 @@ public class MinAggregation extends SingleValueAggregation {
 
     public static final String TYPE = "min";
 
-    public MinAggregation(String name, JsonObject minAggregation) {
+    public MinAggregation(String name, JsonNode minAggregation) {
         super(name, minAggregation);
     }
 

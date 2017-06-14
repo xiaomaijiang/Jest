@@ -1,14 +1,15 @@
 package io.searchbox.cluster;
 
-import com.google.gson.Gson;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.searchbox.cluster.reroute.RerouteAllocate;
 import io.searchbox.cluster.reroute.RerouteCancel;
-import io.searchbox.cluster.reroute.RerouteMove;
 import io.searchbox.cluster.reroute.RerouteCommand;
+import io.searchbox.cluster.reroute.RerouteMove;
 import org.json.JSONException;
 import org.junit.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -17,7 +18,7 @@ import static org.junit.Assert.assertEquals;
 public class RerouteTest {
 
     @Test
-    public void reroute() throws JSONException {
+    public void reroute() throws JSONException, IOException {
         List<RerouteCommand> moveCommands = new LinkedList<RerouteCommand>();
         moveCommands.add(new RerouteMove("index1", 1, "node1", "node2"));
         moveCommands.add(new RerouteCancel("index2", 1, "node2", true));
@@ -32,7 +33,7 @@ public class RerouteTest {
                 "{ \"cancel\": { \"index\": \"index2\", \"shard\": 1, \"node\": \"node2\", \"allow_primary\": true } }," +
                 "{ \"allocate\": { \"index\": \"index3\", \"shard\": 1, \"node\": \"node3\", \"allow_primary\": false } }" +
                 "] }";
-        JSONAssert.assertEquals(expectedData, reroute.getData(new Gson()), false);
+        JSONAssert.assertEquals(expectedData, reroute.getData(new ObjectMapper()), false);
     }
 
 }

@@ -1,6 +1,6 @@
 package io.searchbox.core.search.aggregation;
 
-import com.google.gson.JsonObject;
+import com.fasterxml.jackson.databind.JsonNode;
 
 import java.util.Objects;
 
@@ -11,11 +11,11 @@ public abstract class Bucket extends MetricAggregation {
 
     protected Long count;
 
-    public Bucket(JsonObject bucketRoot, Long count) {
+    public Bucket(JsonNode bucketRoot, Long count) {
         this("bucket", bucketRoot, count);
     }
 
-    public Bucket(String name, JsonObject bucketRoot, Long count) {
+    public Bucket(String name, JsonNode bucketRoot, Long count) {
         super(name, bucketRoot);
         this.count = count;
     }

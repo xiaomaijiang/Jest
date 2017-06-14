@@ -1,8 +1,11 @@
 package io.searchbox.snapshot;
 
-import com.google.gson.Gson;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.elasticsearch.common.settings.Settings;
 import org.junit.Test;
+
+import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
 
@@ -22,7 +25,7 @@ public class CreateSnapshotTest {
     }
 
     @Test
-    public void testSnapshotWithSettings() {
+    public void testSnapshotWithSettings() throws IOException {
 
         final Settings.Builder registerRepositorySettings = Settings.settingsBuilder();
         registerRepositorySettings.put("indices", "index_1,index_2");
@@ -36,7 +39,8 @@ public class CreateSnapshotTest {
 
         assertEquals("PUT", createSnapshot.getRestMethodName());
         assertEquals("/_snapshot/leeseohoo/leeseola?wait_for_completion=true", createSnapshot.getURI());
-        String settings = new Gson().toJson(createSnapshot.getData(new Gson()));
+        final ObjectMapper objectMapper = new ObjectMapper();
+        String settings = objectMapper.writeValueAsString(createSnapshot.getData(objectMapper));
         assertEquals("\"{\\\"ignore_unavailable\\\":\\\"true\\\",\\\"include_global_state\\\":\\\"false\\\",\\\"indices\\\":\\\"index_1,index_2\\\"}\"", settings);
     }
 }

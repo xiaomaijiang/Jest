@@ -1,8 +1,9 @@
 package io.searchbox.core;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonParser;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
+
+import java.io.IOException;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -22,11 +23,12 @@ public class CountResultTest {
             "}";
 
     @Test
-    public void testGetCount() {
-        CountResult countResult = new CountResult(new Gson());
+    public void testGetCount() throws IOException {
+        final ObjectMapper objectMapper = new ObjectMapper();
+        CountResult countResult = new CountResult(objectMapper);
         countResult.setSucceeded(true);
         countResult.setJsonString(json);
-        countResult.setJsonObject(new JsonParser().parse(json).getAsJsonObject());
+        countResult.setJsonObject(objectMapper.readTree(json));
         countResult.setPathToResult("count");
 
         Double count = countResult.getCount();
@@ -35,7 +37,7 @@ public class CountResultTest {
 
     @Test
     public void testGetCountWhenOperationFails() {
-        CountResult countResult = new CountResult(new Gson());
+        CountResult countResult = new CountResult(new ObjectMapper());
         countResult.setSucceeded(false);
 
         Double count = countResult.getCount();

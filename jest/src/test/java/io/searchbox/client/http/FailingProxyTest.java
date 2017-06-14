@@ -103,7 +103,7 @@ public class FailingProxyTest {
         return exception;
     }
 
-    private Exception runAsynchronously() throws InterruptedException {
+    private Exception runAsynchronously() throws InterruptedException, IOException {
         final ResultHandler resultHandler = new ResultHandler();
         client.executeAsync(status, resultHandler);
         return resultHandler.get();

@@ -1,9 +1,7 @@
 package io.searchbox.cluster;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.ImmutableList;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import io.searchbox.client.JestResult;
 import io.searchbox.cluster.reroute.RerouteAllocate;
 import io.searchbox.cluster.reroute.RerouteCancel;
@@ -20,7 +18,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set ;
+import java.util.Set;
 
 @ESIntegTestCase.ClusterScope(scope = ESIntegTestCase.Scope.TEST, numDataNodes = 3)
 public class RerouteIntegrationTest extends AbstractIntegrationTest {
@@ -99,14 +97,14 @@ public class RerouteIntegrationTest extends AbstractIntegrationTest {
 
     private Set<String> getAllDataNodes() throws IOException {
         CatResult result = client.execute(new Cat.NodesBuilder().build());
-        JsonArray nodes = result.getJsonObject().get("result").getAsJsonArray();
+        JsonNode nodes = result.getJsonObject().get("result");
 
         Set<String> nodeNames = new HashSet<String>();
-        for (JsonElement nodeElement : nodes) {
-            JsonObject nodeObj = nodeElement.getAsJsonObject();
-            String nodeRole = nodeObj.get("node.role").getAsString();
+        for (JsonNode nodeElement : nodes) {
+            JsonNode nodeObj = nodeElement;
+            String nodeRole = nodeObj.get("node.role").asText();
             if (nodeRole.indexOf('d') >= 0) {
-                nodeNames.add(nodeObj.get("name").getAsString());
+                nodeNames.add(nodeObj.get("name").asText());
             }
         }
 
@@ -126,15 +124,14 @@ public class RerouteIntegrationTest extends AbstractIntegrationTest {
     }
 
     private Set<String> getNodeOfShard(String index, int shard, boolean isPrimary) throws IOException {
-        char prirep = isPrimary ? 'p' : 'r';
+        String prirep = isPrimary ? "p" : "r";
         CatResult result = client.execute(new Cat.ShardsBuilder().addIndex(index).setParameter("h", "shard,node,prirep").build());
-        JsonArray shards = result.getJsonObject().get("result").getAsJsonArray();
+        JsonNode shards = result.getJsonObject().get("result");
 
         Set<String> resultSet = new HashSet<>();
-        for (JsonElement shardElement : shards) {
-            JsonObject shardObj = shardElement.getAsJsonObject();
-            if (shardObj.get("shard").getAsInt() == shard && shardObj.get("prirep").getAsCharacter() == prirep) {
-                resultSet.add(shardObj.get("node").getAsString());
+        for (JsonNode shardElement : shards) {
+            if (shardElement.get("shard").asInt() == shard && prirep.equals(shardElement.get("prirep").asText())) {
+                resultSet.add(shardElement.get("node").asText());
             }
         }
 

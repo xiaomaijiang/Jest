@@ -1,6 +1,6 @@
 package io.searchbox.core.search.aggregation;
 
-import com.google.gson.JsonObject;
+import com.fasterxml.jackson.databind.JsonNode;
 
 import java.util.List;
 
@@ -9,7 +9,7 @@ import java.util.List;
  */
 public abstract class BucketAggregation extends Aggregation {
 
-    public BucketAggregation(String name, JsonObject root) {
+    public BucketAggregation(String name, JsonNode root) {
         super(name, root);
     }
 

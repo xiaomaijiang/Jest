@@ -1,7 +1,9 @@
 package io.searchbox.action;
 
-import com.google.gson.Gson;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.searchbox.core.DocumentResult;
+
+import java.io.IOException;
 
 /**
  * @author Bartosz Polnik
@@ -12,7 +14,7 @@ public abstract class SingleResultAbstractDocumentTargetedAction extends Abstrac
     }
 
     @Override
-    public DocumentResult createNewElasticSearchResult(String responseBody, int statusCode, String reasonPhrase, Gson gson) {
-        return createNewElasticSearchResult(new DocumentResult(gson), responseBody, statusCode, reasonPhrase, gson);
+    public DocumentResult createNewElasticSearchResult(String responseBody, int statusCode, String reasonPhrase, ObjectMapper objectMapper) throws IOException {
+        return createNewElasticSearchResult(new DocumentResult(objectMapper), responseBody, statusCode, reasonPhrase, objectMapper);
     }
 }

@@ -1,6 +1,6 @@
 package io.searchbox.cluster;
 
-import com.google.gson.JsonObject;
+import com.fasterxml.jackson.databind.JsonNode;
 import io.searchbox.client.JestResult;
 import io.searchbox.common.AbstractIntegrationTest;
 import org.elasticsearch.test.ESIntegTestCase;
@@ -15,14 +15,14 @@ public class StatsIntegrationTest extends AbstractIntegrationTest {
         JestResult result = client.execute(new Stats.Builder().build());
         assertTrue(result.getErrorMessage(), result.isSucceeded());
 
-        JsonObject resultJson = result.getJsonObject();
+        JsonNode resultJson = result.getJsonObject();
         assertNotNull(resultJson);
-        assertNotNull(resultJson.getAsJsonPrimitive("timestamp"));
-        assertNotNull(resultJson.getAsJsonPrimitive("cluster_name"));
-        assertNotNull(resultJson.getAsJsonPrimitive("status"));
-        assertNotNull(resultJson.getAsJsonObject("indices"));
-        assertNotNull(resultJson.getAsJsonObject("nodes"));
-        assertEquals(internalCluster().size(), resultJson.getAsJsonObject("nodes").getAsJsonObject("count").get("total").getAsInt());
+        assertNotNull(resultJson.get("timestamp"));
+        assertNotNull(resultJson.get("cluster_name"));
+        assertNotNull(resultJson.get("status"));
+        assertNotNull(resultJson.get("indices"));
+        assertNotNull(resultJson.get("nodes"));
+        assertEquals(internalCluster().size(), resultJson.path("nodes").path("count").path("total").intValue());
 
     }
 
@@ -32,12 +32,12 @@ public class StatsIntegrationTest extends AbstractIntegrationTest {
         JestResult result = client.execute(new Stats.Builder().addNode(localNodeName).build());
         assertTrue(result.getErrorMessage(), result.isSucceeded());
 
-        JsonObject resultJson = result.getJsonObject();
+        JsonNode resultJson = result.getJsonObject();
         assertNotNull(resultJson);
-        assertNotNull(resultJson.getAsJsonPrimitive("timestamp"));
-        assertNotNull(resultJson.getAsJsonPrimitive("cluster_name"));
-        assertNotNull(resultJson.getAsJsonObject("indices"));
-        assertNotNull(resultJson.getAsJsonObject("nodes"));
-        assertEquals(1, resultJson.getAsJsonObject("nodes").getAsJsonObject("count").get("total").getAsInt());
+        assertNotNull(resultJson.get("timestamp"));
+        assertNotNull(resultJson.get("cluster_name"));
+        assertNotNull(resultJson.get("indices"));
+        assertNotNull(resultJson.get("nodes"));
+        assertEquals(1, resultJson.path("nodes").path("count").path("total").intValue());
     }
 }

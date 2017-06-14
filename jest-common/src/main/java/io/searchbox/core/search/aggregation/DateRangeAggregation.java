@@ -1,14 +1,17 @@
 package io.searchbox.core.search.aggregation;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import com.fasterxml.jackson.databind.JsonNode;
 
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
-import static io.searchbox.core.search.aggregation.AggregationField.*;
+import static io.searchbox.core.search.aggregation.AggregationField.BUCKETS;
+import static io.searchbox.core.search.aggregation.AggregationField.DOC_COUNT;
+import static io.searchbox.core.search.aggregation.AggregationField.FROM;
+import static io.searchbox.core.search.aggregation.AggregationField.FROM_AS_STRING;
+import static io.searchbox.core.search.aggregation.AggregationField.TO;
+import static io.searchbox.core.search.aggregation.AggregationField.TO_AS_STRING;
 
 /**
  * @author cfstout
@@ -19,24 +22,23 @@ public class DateRangeAggregation extends BucketAggregation {
 
     private List<DateRange> ranges = new LinkedList<DateRange>();
 
-    public DateRangeAggregation(String name, JsonObject dateRangeAggregation) {
+    public DateRangeAggregation(String name, JsonNode dateRangeAggregation) {
         super(name, dateRangeAggregation);
-        if (dateRangeAggregation.has(String.valueOf(BUCKETS)) && dateRangeAggregation.get(String.valueOf(BUCKETS)).isJsonArray()) {
-            parseBuckets(dateRangeAggregation.get(String.valueOf(BUCKETS)).getAsJsonArray());
+        if (dateRangeAggregation.has(String.valueOf(BUCKETS)) && dateRangeAggregation.get(String.valueOf(BUCKETS)).isArray()) {
+            parseBuckets(dateRangeAggregation.get(String.valueOf(BUCKETS)));
         }
     }
 
-    private void parseBuckets(JsonArray buckets) {
+    private void parseBuckets(JsonNode buckets) {
         //todo support keyed:true as well
-        for (JsonElement bucketv : buckets) {
-            JsonObject bucket = bucketv.getAsJsonObject();
+        for (JsonNode bucket : buckets) {
             DateRange range = new DateRange(
                     bucket,
-                    bucket.has(String.valueOf(FROM)) ? bucket.get(String.valueOf(FROM)).getAsDouble() : null,
-                    bucket.has(String.valueOf(TO)) ? bucket.get(String.valueOf(TO)).getAsDouble() : null,
-                    bucket.get(String.valueOf(DOC_COUNT)).getAsLong(),
-                    bucket.has(String.valueOf(FROM_AS_STRING)) ? bucket.get(String.valueOf(FROM_AS_STRING)).getAsString() : null,
-                    bucket.has(String.valueOf(TO_AS_STRING)) ? bucket.get(String.valueOf(TO_AS_STRING)).getAsString() : null);
+                    bucket.has(String.valueOf(FROM)) ? bucket.get(String.valueOf(FROM)).asDouble() : null,
+                    bucket.has(String.valueOf(TO)) ? bucket.get(String.valueOf(TO)).asDouble() : null,
+                    bucket.get(String.valueOf(DOC_COUNT)).asLong(),
+                    bucket.has(String.valueOf(FROM_AS_STRING)) ? bucket.get(String.valueOf(FROM_AS_STRING)).asText() : null,
+                    bucket.has(String.valueOf(TO_AS_STRING)) ? bucket.get(String.valueOf(TO_AS_STRING)).asText() : null);
             ranges.add(range);
         }
     }
@@ -49,7 +51,7 @@ public class DateRangeAggregation extends BucketAggregation {
         private String fromAsString;
         private String toAsString;
 
-        public DateRange(JsonObject bucket, Double from, Double to, Long count, String fromString, String toString) {
+        public DateRange(JsonNode bucket, Double from, Double to, Long count, String fromString, String toString) {
             super(bucket, from, to, count);
             this.fromAsString = fromString;
             this.toAsString = toString;

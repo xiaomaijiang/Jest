@@ -1,11 +1,11 @@
 package io.searchbox.core.search.aggregation;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import com.fasterxml.jackson.databind.JsonNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -25,29 +25,31 @@ public class FiltersAggregation extends BucketAggregation {
     private Map<String, Bucket> bucketMap = new HashMap<String, Bucket>();
     private List<Bucket> bucketList = new LinkedList<Bucket>();
 
-    public FiltersAggregation(String name, JsonObject filtersAggregation) {
+    public FiltersAggregation(String name, JsonNode filtersAggregation) {
         super(name, filtersAggregation);
         if (filtersAggregation.has(String.valueOf(BUCKETS))) {
             parseBuckets(filtersAggregation.get(String.valueOf(BUCKETS)));
         }
     }
 
-    private void parseBuckets(JsonElement buckets) {
-        if (buckets.isJsonArray()) {
+    private void parseBuckets(JsonNode buckets) {
+        if (buckets.isArray()) {
             int elementNumber = 0;
-            for (JsonElement bucket : buckets.getAsJsonArray()) {
-                addBucket("filter" + Integer.toString(elementNumber++), bucket.getAsJsonObject());
+            for (JsonNode bucket : buckets) {
+                addBucket("filter" + Integer.toString(elementNumber++), bucket);
             }
-        } else if (buckets.isJsonObject()) {
-            for (Map.Entry<String, JsonElement> bucket : buckets.getAsJsonObject().entrySet()) {
-                addBucket(bucket.getKey(), bucket.getValue().getAsJsonObject());
+        } else if (buckets.isObject()) {
+            final Iterator<Map.Entry<String, JsonNode>> it = buckets.fields();
+            while (it.hasNext()) {
+                final Map.Entry<String, JsonNode> bucket = it.next();
+                addBucket(bucket.getKey(), bucket.getValue());
             }
         } else {
             log.debug("Skipped bucket parsing because Buckets element of JSON was neither Object nor Array.");
         }
     }
 
-    private void addBucket(String filterName, JsonObject bucketSource) {
+    private void addBucket(String filterName, JsonNode bucketSource) {
         FilterAggregation bucket = new FilterAggregation(filterName, bucketSource);
         bucketMap.put(filterName, bucket);
         bucketList.add(bucket);

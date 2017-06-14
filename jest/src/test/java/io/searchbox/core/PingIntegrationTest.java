@@ -1,6 +1,6 @@
 package io.searchbox.core;
 
-import com.google.gson.JsonObject;
+import com.fasterxml.jackson.databind.JsonNode;
 import io.searchbox.client.JestResult;
 import io.searchbox.common.AbstractIntegrationTest;
 import org.elasticsearch.test.ESIntegTestCase;
@@ -16,11 +16,11 @@ public class PingIntegrationTest extends AbstractIntegrationTest {
         JestResult result = client.execute(ping);
 
         assertTrue(result.getErrorMessage(), result.isSucceeded());
-        final JsonObject responseJson = result.getJsonObject();
-        assertNotNull(responseJson.getAsJsonPrimitive("name"));
-        assertNotNull(responseJson.getAsJsonPrimitive("cluster_name"));
-        assertNotNull(responseJson.getAsJsonPrimitive("cluster_uuid"));
-        assertNotNull(responseJson.getAsJsonObject("version"));
-        assertEquals("You Know, for Search", responseJson.get("tagline").getAsString());
+        final JsonNode responseJson = result.getJsonObject();
+        assertNotNull(responseJson.get("name"));
+        assertNotNull(responseJson.get("cluster_name"));
+        assertNotNull(responseJson.get("cluster_uuid"));
+        assertNotNull(responseJson.get("version"));
+        assertEquals("You Know, for Search", responseJson.get("tagline").asText());
     }
 }

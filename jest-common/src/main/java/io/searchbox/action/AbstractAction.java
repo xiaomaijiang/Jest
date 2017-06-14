@@ -1,14 +1,13 @@
 package io.searchbox.action;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Joiner;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.google.gson.JsonSyntaxException;
 import io.searchbox.annotations.JestId;
 import io.searchbox.client.JestResult;
 import io.searchbox.params.Parameters;
@@ -16,6 +15,7 @@ import io.searchbox.strings.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.net.URLEncoder;
@@ -67,8 +67,8 @@ public abstract class AbstractAction<T extends JestResult> implements Action<T> 
         }
     }
 
-    protected T createNewElasticSearchResult(T result, String responseBody, int statusCode, String reasonPhrase, Gson gson) {
-        JsonObject jsonMap = parseResponseBody(responseBody);
+    protected T createNewElasticSearchResult(T result, String responseBody, int statusCode, String reasonPhrase, ObjectMapper objectMapper) throws IOException {
+        ObjectNode jsonMap = parseResponseBody(responseBody, objectMapper);
         result.setResponseCode(statusCode);
         result.setJsonString(responseBody);
         result.setJsonObject(jsonMap);
@@ -95,16 +95,18 @@ public abstract class AbstractAction<T extends JestResult> implements Action<T> 
         return (httpCode / 100) == 2;
     }
 
-    protected JsonObject parseResponseBody(String responseBody) {
+    protected ObjectNode parseResponseBody(String responseBody, ObjectMapper objectMapper) throws IOException {
         if (responseBody == null || responseBody.trim().isEmpty()) {
-            return new JsonObject();
+            return objectMapper.createObjectNode();
         }
 
-        JsonElement parsed = new JsonParser().parse(responseBody);
-        if (parsed.isJsonObject()) {
-            return parsed.getAsJsonObject();
+        final JsonNode parsed = objectMapper.readTree(responseBody);
+
+        if (parsed.isObject()) {
+            return (ObjectNode) parsed;
         } else {
-            throw new JsonSyntaxException("Response did not contain a JSON Object");
+            // TODO: Specific exception?
+            throw new IllegalArgumentException("Response did not contain a JSON Object");
         }
     }
 
@@ -158,13 +160,18 @@ public abstract class AbstractAction<T extends JestResult> implements Action<T> 
     }
 
     @Override
-    public String getData(Gson gson) {
+    public String getData(ObjectMapper objectMapper) throws IOException {
         if (payload == null) {
             return null;
         } else if (payload instanceof String) {
             return (String) payload;
         } else {
-            return gson.toJson(payload);
+            try {
+                return objectMapper.writeValueAsString(payload);
+            } catch (JsonProcessingException e) {
+                log.debug("Error while writing JSON", e);
+                return null;
+            }
         }
     }
 

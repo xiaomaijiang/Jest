@@ -1,10 +1,14 @@
 package io.searchbox.core.search.aggregation;
 
-import com.google.gson.JsonObject;
+import com.fasterxml.jackson.databind.JsonNode;
 
 import java.util.Objects;
 
-import static io.searchbox.core.search.aggregation.AggregationField.*;
+import static io.searchbox.core.search.aggregation.AggregationField.AVG;
+import static io.searchbox.core.search.aggregation.AggregationField.COUNT;
+import static io.searchbox.core.search.aggregation.AggregationField.MAX;
+import static io.searchbox.core.search.aggregation.AggregationField.MIN;
+import static io.searchbox.core.search.aggregation.AggregationField.SUM;
 
 /**
  * @author cfstout
@@ -19,17 +23,17 @@ public class StatsAggregation extends MetricAggregation {
     private Double avg;
     private Double sum;
 
-    public StatsAggregation(String name, JsonObject statsAggregation) {
+    public StatsAggregation(String name, JsonNode statsAggregation) {
         super(name, statsAggregation);
-        this.count = statsAggregation.get(String.valueOf(COUNT)).getAsLong();
-        this.min = !statsAggregation.has(String.valueOf(MIN)) || statsAggregation.get(String.valueOf(MIN)).isJsonNull() ?
-            null : statsAggregation.get(String.valueOf(MIN)).getAsDouble();
-        this.max = !statsAggregation.has(String.valueOf(MAX)) || statsAggregation.get(String.valueOf(MAX)).isJsonNull() ?
-                null : statsAggregation.get(String.valueOf(MAX)).getAsDouble();
-        this.avg = !statsAggregation.has(String.valueOf(AVG)) || statsAggregation.get(String.valueOf(AVG)).isJsonNull() ?
-                null : statsAggregation.get(String.valueOf(AVG)).getAsDouble();
-        this.sum = !statsAggregation.has(String.valueOf(SUM)) || statsAggregation.get(String.valueOf(SUM)).isJsonNull() ?
-                null : statsAggregation.get(String.valueOf(SUM)).getAsDouble();
+        this.count = statsAggregation.get(String.valueOf(COUNT)).asLong();
+        this.min = !statsAggregation.has(String.valueOf(MIN)) || statsAggregation.get(String.valueOf(MIN)).isNull() ?
+            null : statsAggregation.get(String.valueOf(MIN)).asDouble();
+        this.max = !statsAggregation.has(String.valueOf(MAX)) || statsAggregation.get(String.valueOf(MAX)).isNull() ?
+                null : statsAggregation.get(String.valueOf(MAX)).asDouble();
+        this.avg = !statsAggregation.has(String.valueOf(AVG)) || statsAggregation.get(String.valueOf(AVG)).isNull() ?
+                null : statsAggregation.get(String.valueOf(AVG)).asDouble();
+        this.sum = !statsAggregation.has(String.valueOf(SUM)) || statsAggregation.get(String.valueOf(SUM)).isNull() ?
+                null : statsAggregation.get(String.valueOf(SUM)).asDouble();
     }
 
     public Long getCount() {

@@ -1,10 +1,11 @@
 package io.searchbox.core;
 
-import com.google.gson.Gson;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.searchbox.action.AbstractAction;
 import io.searchbox.action.GenericResultAbstractAction;
 import io.searchbox.strings.StringUtils;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -26,8 +27,8 @@ public class MultiSearch extends AbstractAction<MultiSearchResult> {
     }
 
     @Override
-    public MultiSearchResult createNewElasticSearchResult(String responseBody, int statusCode, String reasonPhrase, Gson gson) {
-        return createNewElasticSearchResult(new MultiSearchResult(gson), responseBody, statusCode, reasonPhrase, gson);
+    public MultiSearchResult createNewElasticSearchResult(String responseBody, int statusCode, String reasonPhrase, ObjectMapper objectMapper) throws IOException {
+        return createNewElasticSearchResult(new MultiSearchResult(objectMapper), responseBody, statusCode, reasonPhrase, objectMapper);
     }
 
     @Override
@@ -36,7 +37,7 @@ public class MultiSearch extends AbstractAction<MultiSearchResult> {
     }
 
     @Override
-    public String getData(Gson gson) {
+    public String getData(ObjectMapper objectMapper) throws IOException {
         /*
             {"index" : "test"}
             {"query" : {"match_all" : {}}, "from" : 0, "size" : 10}
@@ -55,7 +56,7 @@ public class MultiSearch extends AbstractAction<MultiSearchResult> {
             sb.append(getParameter(search, "allow_no_indices"));
             sb.append(getParameter(search, "expand_wildcards"));
             sb.append("\"}\n")
-                    .append(search.getData(gson))
+                    .append(search.getData(objectMapper))
                     .append("\n");
         }
         return sb.toString();

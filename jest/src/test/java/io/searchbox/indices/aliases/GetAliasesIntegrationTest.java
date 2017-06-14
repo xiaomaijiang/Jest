@@ -42,8 +42,8 @@ public class GetAliasesIntegrationTest extends AbstractIntegrationTest {
         GetAliases getAliases = new GetAliases.Builder().build();
         JestResult result = client.execute(getAliases);
         assertTrue(result.getErrorMessage(), result.isSucceeded());
-        assertEquals(1, result.getJsonObject().getAsJsonObject(INDEX_NAME).getAsJsonObject("aliases").entrySet().size());
-        assertEquals(0, result.getJsonObject().getAsJsonObject(INDEX_NAME_2).getAsJsonObject("aliases").entrySet().size());
+        assertEquals(1, result.getJsonObject().path(INDEX_NAME).path("aliases").size());
+        assertEquals(0, result.getJsonObject().path(INDEX_NAME_2).path("aliases").size());
     }
 
     @Test
@@ -61,8 +61,8 @@ public class GetAliasesIntegrationTest extends AbstractIntegrationTest {
         GetAliases getAliases = new GetAliases.Builder().addIndex(INDEX_NAME).build();
         JestResult result = client.execute(getAliases);
         assertTrue(result.getErrorMessage(), result.isSucceeded());
-        assertEquals(1, result.getJsonObject().entrySet().size());
-        assertEquals(1, result.getJsonObject().getAsJsonObject(INDEX_NAME).getAsJsonObject("aliases").entrySet().size());
+        assertEquals(1, result.getJsonObject().size());
+        assertEquals(1, result.getJsonObject().path(INDEX_NAME).path("aliases").size());
     }
 
     @Test
@@ -70,9 +70,9 @@ public class GetAliasesIntegrationTest extends AbstractIntegrationTest {
         GetAliases getAliases = new GetAliases.Builder().addIndex(INDEX_NAME).addIndex(INDEX_NAME_3).build();
         JestResult result = client.execute(getAliases);
         assertTrue(result.getErrorMessage(), result.isSucceeded());
-        assertEquals(2, result.getJsonObject().entrySet().size());
-        assertEquals(0, result.getJsonObject().getAsJsonObject(INDEX_NAME).getAsJsonObject("aliases").entrySet().size());
-        assertEquals(0, result.getJsonObject().getAsJsonObject(INDEX_NAME_3).getAsJsonObject("aliases").entrySet().size());
+        assertEquals(2, result.getJsonObject().size());
+        assertEquals(0, result.getJsonObject().path(INDEX_NAME).path("aliases").size());
+        assertEquals(0, result.getJsonObject().path(INDEX_NAME_3).path("aliases").size());
     }
 
 }

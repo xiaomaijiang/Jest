@@ -1,8 +1,8 @@
 package io.searchbox.action;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonSyntaxException;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.searchbox.annotations.JestId;
 import io.searchbox.client.JestResult;
 import io.searchbox.core.Delete;
@@ -12,7 +12,13 @@ import io.searchbox.core.Update;
 import io.searchbox.indices.Flush;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import java.io.IOException;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Dogukan Sonmez
@@ -90,15 +96,15 @@ public class AbstractActionTest {
     }
 
     @Test
-    public void requestDataMultipleClientRequest() {
+    public void requestDataMultipleClientRequest() throws IOException {
         Index indexDocument = new Index.Builder("\"indexDocumentData\"").index("index").type("type").id("id").build();
         Update update = new Update.Builder("\"updateData\"").index("indexName").type("indexType").id("1").build();
 
-        assertEquals("\"updateData\"", update.getData(null).toString());
+        assertEquals("\"updateData\"", update.getData(null));
         assertEquals("POST", update.getRestMethodName());
         assertEquals("indexName/indexType/1/_update", update.getURI());
 
-        assertEquals("\"indexDocumentData\"", indexDocument.getData(null).toString());
+        assertEquals("\"indexDocumentData\"", indexDocument.getData(null));
         assertEquals("PUT", indexDocument.getRestMethodName());
         assertEquals("index/type/id", indexDocument.getURI());
     }
@@ -152,47 +158,47 @@ public class AbstractActionTest {
     }
 
     @Test
-    public void convertJsonStringToMapObject() {
+    public void convertJsonStringToMapObject() throws IOException {
         String json = "{\n" +
                 "    \"ok\" : true,\n" +
                 "    \"_index\" : \"twitter\",\n" +
                 "    \"_type\" : \"tweet\",\n" +
                 "    \"_id\" : \"1\"\n" +
                 "}";
-        JsonObject jsonMap = new DummyAction.Builder().build().parseResponseBody(json);
+        JsonNode jsonMap = new DummyAction.Builder().build().parseResponseBody(json, new ObjectMapper());
         assertNotNull(jsonMap);
-        assertEquals(4, jsonMap.entrySet().size());
-        assertEquals(true, jsonMap.get("ok").getAsBoolean());
-        assertEquals("twitter", jsonMap.get("_index").getAsString());
-        assertEquals("tweet", jsonMap.get("_type").getAsString());
-        assertEquals("1", jsonMap.get("_id").getAsString());
+        assertEquals(4, jsonMap.size());
+        assertEquals(true, jsonMap.get("ok").asBoolean());
+        assertEquals("twitter", jsonMap.get("_index").asText());
+        assertEquals("tweet", jsonMap.get("_type").asText());
+        assertEquals("1", jsonMap.get("_id").asText());
     }
 
     @Test
-    public void convertEmptyJsonStringToMapObject() {
-        JsonObject jsonMap = new DummyAction.Builder().build().parseResponseBody("");
+    public void convertEmptyJsonStringToMapObject() throws IOException {
+        JsonNode jsonMap = new DummyAction.Builder().build().parseResponseBody("", new ObjectMapper());
         assertNotNull(jsonMap);
     }
 
     @Test
-    public void convertNullJsonStringToMapObject() {
-        JsonObject jsonMap = new DummyAction.Builder().build().parseResponseBody(null);
+    public void convertNullJsonStringToMapObject() throws IOException {
+        JsonNode jsonMap = new DummyAction.Builder().build().parseResponseBody(null, new ObjectMapper());
         assertNotNull(jsonMap);
     }
 
-    @Test(expected = JsonSyntaxException.class)
-    public void propagateExceptionWhenTheResponseIsNotJson1() {
-        new DummyAction.Builder().build().parseResponseBody("401 Unauthorized");
+    @Test(expected = IllegalArgumentException.class)
+    public void propagateExceptionWhenTheResponseIsNotJson1() throws IOException {
+        new DummyAction.Builder().build().parseResponseBody("401 Unauthorized", new ObjectMapper());
     }
 
-    @Test(expected = JsonSyntaxException.class)
-    public void propagateExceptionWhenTheResponseIsNotJson2() {
-        new DummyAction.Builder().build().parseResponseBody("banana");
+    @Test(expected = JsonParseException.class)
+    public void propagateExceptionWhenTheResponseIsNotJson2() throws IOException {
+        new DummyAction.Builder().build().parseResponseBody("banana", new ObjectMapper());
     }
 
 
     @Test
-    public void getSuccessIndexResult() {
+    public void getSuccessIndexResult() throws IOException {
         String jsonString = "{\n" +
                 "    \"ok\" : true,\n" +
                 "    \"_index\" : \"twitter\",\n" +
@@ -200,22 +206,22 @@ public class AbstractActionTest {
                 "    \"_id\" : \"1\"\n" +
                 "}\n";
         Index index = new Index.Builder("{\"abc\":\"dce\"}").index("test").build();
-        JestResult result = index.createNewElasticSearchResult(jsonString, 200, null, new Gson());
+        JestResult result = index.createNewElasticSearchResult(jsonString, 200, null, new ObjectMapper());
         assertTrue(result.getErrorMessage(), result.isSucceeded());
         assertEquals(200, result.getResponseCode());
     }
 
     @Test
-    public void getFailedIndexResult() {
+    public void getFailedIndexResult() throws IOException {
         String jsonString = "{\"error\":\"Invalid index\",\"status\":400}";
         Index index = new Index.Builder("{\"abc\":\"dce\"}").index("test").build();
-        JestResult result = index.createNewElasticSearchResult(jsonString, 400, null, new Gson());
+        JestResult result = index.createNewElasticSearchResult(jsonString, 400, null, new ObjectMapper());
         assertFalse(result.isSucceeded());
         assertEquals("\"Invalid index\"", result.getErrorMessage());
     }
 
     @Test
-    public void getSuccessDeleteResult() {
+    public void getSuccessDeleteResult() throws IOException {
         String jsonString = "{\n" +
                 "    \"ok\" : true,\n" +
                 "    \"_index\" : \"twitter\",\n" +
@@ -224,13 +230,13 @@ public class AbstractActionTest {
                 "    \"found\" : true\n" +
                 "}\n";
         Delete delete = new Delete.Builder("1").index("twitter").type("tweet").build();
-        JestResult result = delete.createNewElasticSearchResult(jsonString, 200, null, new Gson());
+        JestResult result = delete.createNewElasticSearchResult(jsonString, 200, null, new ObjectMapper());
         assertTrue(result.getErrorMessage(), result.isSucceeded());
     }
 
     //TODO: This cannot be derived from the result anymore
     @Test
-    public void getFailedDeleteResult() {
+    public void getFailedDeleteResult() throws IOException {
         String jsonString = "{\n" +
                 "    \"_index\" : \"twitter\",\n" +
                 "    \"_type\" : \"tweet\",\n" +
@@ -238,12 +244,12 @@ public class AbstractActionTest {
                 "    \"found\" : false\n" +
                 "}\n";
         Delete delete = new Delete.Builder("1").index("test").type("tweet").build();
-        JestResult result = delete.createNewElasticSearchResult(jsonString, 404, null, new Gson());
+        JestResult result = delete.createNewElasticSearchResult(jsonString, 404, null, new ObjectMapper());
         assertFalse(result.isSucceeded());
     }
 
     @Test
-    public void getSuccessGetResult() {
+    public void getSuccessGetResult() throws IOException {
         String jsonString = "{" +
                 "    \"_index\" : \"twitter\"," +
                 "    \"_type\" : \"tweet\"," +
@@ -251,7 +257,7 @@ public class AbstractActionTest {
                 "    \"exists\" : true" +
                 "}";
         Get get = new Get.Builder("test", "1").build();
-        JestResult result = get.createNewElasticSearchResult(jsonString, 200, null, new Gson());
+        JestResult result = get.createNewElasticSearchResult(jsonString, 200, null, new ObjectMapper());
         assertTrue(result.getErrorMessage(), result.isSucceeded());
     }
 

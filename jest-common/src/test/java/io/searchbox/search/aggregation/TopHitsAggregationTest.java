@@ -1,18 +1,17 @@
 package io.searchbox.search.aggregation;
 
-import static org.junit.Assert.*;
-
-import java.util.List;
-
-import org.junit.Test;
-
-import com.google.gson.Gson;
-import com.google.gson.JsonParser;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.searchbox.core.SearchResult;
 import io.searchbox.core.search.aggregation.TermsAggregation;
 import io.searchbox.core.search.aggregation.TermsAggregation.Entry;
 import io.searchbox.core.search.aggregation.TopHitsAggregation;
+import org.junit.Test;
+
+import java.io.IOException;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 public class TopHitsAggregationTest {
     String json = "{\n" +
@@ -96,11 +95,12 @@ public class TopHitsAggregationTest {
             "}";
 
     @Test
-    public void testGetMaxScoreWhenMissing() {	
-        SearchResult searchResult = new SearchResult(new Gson());
+    public void testGetMaxScoreWhenMissing() throws IOException {
+        final ObjectMapper objectMapper = new ObjectMapper();
+        SearchResult searchResult = new SearchResult(objectMapper);
         searchResult.setSucceeded(true);
         searchResult.setJsonString(json);
-        searchResult.setJsonObject(new JsonParser().parse(json).getAsJsonObject());
+        searchResult.setJsonObject(objectMapper.readTree(json));
         searchResult.setPathToResult("hits/hits/_source");
 
         Float maxScore = searchResult.getMaxScore();

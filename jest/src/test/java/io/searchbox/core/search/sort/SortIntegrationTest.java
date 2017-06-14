@@ -1,5 +1,6 @@
 package io.searchbox.core.search.sort;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import io.searchbox.client.JestResult;
 import io.searchbox.common.AbstractIntegrationTest;
 import io.searchbox.core.Search;
@@ -49,11 +50,11 @@ public class SortIntegrationTest extends AbstractIntegrationTest {
                 .build();
         JestResult result = client.execute(search);
         assertTrue(result.getErrorMessage(), result.isSucceeded());
-        List hits = ((List) ((Map) result.getJsonMap().get("hits")).get("hits"));
+        JsonNode hits = result.getJsonObject().path("hits").path("hits");
         assertEquals(3, hits.size());
-        assertEquals(5D, ((Map) ((Map) hits.get(0)).get("_source")).get("rank"));
-        assertEquals(8D, ((Map) ((Map) hits.get(1)).get("_source")).get("rank"));
-        assertEquals(10D, ((Map) ((Map) hits.get(2)).get("_source")).get("rank"));
+        assertEquals(5D, hits.path(0).path("_source").path("rank").asDouble(), 0.0D);
+        assertEquals(8D, hits.path(1).path("_source").path("rank").asDouble(), 0.0D);
+        assertEquals(10D, hits.path(2).path("_source").path("rank").asDouble(), 0.0D);
     }
 
     @Test
@@ -66,11 +67,11 @@ public class SortIntegrationTest extends AbstractIntegrationTest {
                 .build();
         JestResult result = client.execute(search);
         assertTrue(result.getErrorMessage(), result.isSucceeded());
-        List hits = ((List) ((Map) result.getJsonMap().get("hits")).get("hits"));
+        JsonNode hits = result.getJsonObject().path("hits").path("hits");
         assertEquals(3, hits.size());
-        assertEquals(5D, ((Map) ((Map) hits.get(2)).get("_source")).get("rank"));
-        assertEquals(8D, ((Map) ((Map) hits.get(1)).get("_source")).get("rank"));
-        assertEquals(10D, ((Map) ((Map) hits.get(0)).get("_source")).get("rank"));
+        assertEquals(5D, hits.path(2).path("_source").path("rank").asDouble(), 0D);
+        assertEquals(8D, hits.path(1).path("_source").path("rank").asDouble(), 0D);
+        assertEquals(10D, hits.path(0).path("_source").path("rank").asDouble(), 0D);
     }
 
 }

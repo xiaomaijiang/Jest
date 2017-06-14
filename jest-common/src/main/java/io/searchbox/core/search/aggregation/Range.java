@@ -1,6 +1,6 @@
 package io.searchbox.core.search.aggregation;
 
-import com.google.gson.JsonObject;
+import com.fasterxml.jackson.databind.JsonNode;
 
 import java.util.Objects;
 
@@ -11,7 +11,7 @@ public class Range extends Bucket {
     private Double from = Double.NEGATIVE_INFINITY;
     private Double to = Double.POSITIVE_INFINITY;
 
-    public Range(JsonObject bucket, Double from, Double to, Long count) {
+    public Range(JsonNode bucket, Double from, Double to, Long count) {
         super(bucket, count);
         this.from = from;
         this.to = to;

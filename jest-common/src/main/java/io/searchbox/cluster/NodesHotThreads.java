@@ -1,6 +1,7 @@
 package io.searchbox.cluster;
 
-import com.google.gson.JsonObject;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.searchbox.action.AbstractMultiINodeActionBuilder;
 import io.searchbox.action.GenericResultAbstractAction;
 
@@ -26,8 +27,8 @@ public class NodesHotThreads extends GenericResultAbstractAction {
     }
 
     @Override
-    protected JsonObject parseResponseBody(String responseBody) {
-        return new JsonObject();
+    protected ObjectNode parseResponseBody(String responseBody, ObjectMapper objectMapper) {
+        return objectMapper.createObjectNode();
     }
 
     @Override

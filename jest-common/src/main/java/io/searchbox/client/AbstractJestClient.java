@@ -1,17 +1,18 @@
 package io.searchbox.client;
 
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import io.searchbox.client.config.discovery.NodeChecker;
 import io.searchbox.client.config.exception.NoServerConfiguredException;
 import io.searchbox.client.config.idle.IdleConnectionReaper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -24,9 +25,9 @@ public abstract class AbstractJestClient implements JestClient {
 
     public static final String ELASTIC_SEARCH_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ssZ";
 
-    protected Gson gson = new GsonBuilder()
-            .setDateFormat(ELASTIC_SEARCH_DATE_FORMAT)
-            .create();
+    protected ObjectMapper objectMapper = new ObjectMapper()
+            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+            .setDateFormat(new SimpleDateFormat(ELASTIC_SEARCH_DATE_FORMAT));
 
     private final static Logger log = LoggerFactory.getLogger(AbstractJestClient.class);
 

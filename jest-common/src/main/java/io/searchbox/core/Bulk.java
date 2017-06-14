@@ -1,8 +1,8 @@
 package io.searchbox.core;
 
-import com.google.common.reflect.TypeToken;
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.searchbox.action.AbstractAction;
 import io.searchbox.action.BulkableAction;
 import io.searchbox.action.GenericResultAbstractAction;
@@ -11,7 +11,12 @@ import io.searchbox.strings.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.io.IOException;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * The bulk API makes it possible to perform many index/delete operations in a
@@ -40,11 +45,11 @@ public class Bulk extends AbstractAction<BulkResult> {
         setURI(buildURI());
     }
 
-    private Object getJson(Gson gson, Object source) {
+    private Object getJson(ObjectMapper objectMapper, Object source) throws JsonProcessingException {
         if (source instanceof String) {
             return source;
         } else {
-            return gson.toJson(source);
+            return objectMapper.writeValueAsString(source);
         }
     }
 
@@ -54,7 +59,7 @@ public class Bulk extends AbstractAction<BulkResult> {
     }
 
     @Override
-    public String getData(Gson gson) {
+    public String getData(ObjectMapper objectMapper) throws IOException {
         /*
         { "index" : { "_index" : "test", "_type" : "type1", "_id" : "1" } }
         { "field1" : "value1" }
@@ -93,15 +98,14 @@ public class Bulk extends AbstractAction<BulkResult> {
             }
 
             opMap.put(action.getBulkMethodName(), opDetails);
-            sb.append(gson.toJson(opMap, new TypeToken<Map<String, Map<String, String>>>() {
-            }.getType()));
+            sb.append(objectMapper.writeValueAsString(opMap));
             sb.append("\n");
 
             // write out the action source/document line
             // e.g.: { "field1" : "value1" }
-            Object source = action.getData(gson);
+            Object source = action.getData(objectMapper);
             if (source != null) {
-                sb.append(getJson(gson, source));
+                sb.append(getJson(objectMapper, source));
                 sb.append("\n");
             }
 
@@ -120,20 +124,20 @@ public class Bulk extends AbstractAction<BulkResult> {
     }
 
     @Override
-    public BulkResult createNewElasticSearchResult(String responseBody, int statusCode, String reasonPhrase, Gson gson) {
-        return createNewElasticSearchResult(new BulkResult(gson), responseBody, statusCode, reasonPhrase, gson);
+    public BulkResult createNewElasticSearchResult(String responseBody, int statusCode, String reasonPhrase, ObjectMapper objectMapper) throws IOException {
+        return createNewElasticSearchResult(new BulkResult(objectMapper), responseBody, statusCode, reasonPhrase, objectMapper);
     }
 
     @Override
-    protected BulkResult createNewElasticSearchResult(BulkResult result, String responseBody, int statusCode, String reasonPhrase, Gson gson) {
-        JsonObject jsonMap = parseResponseBody(responseBody);
+    protected BulkResult createNewElasticSearchResult(BulkResult result, String responseBody, int statusCode, String reasonPhrase, ObjectMapper objectMapper) throws IOException {
+        ObjectNode jsonMap = parseResponseBody(responseBody, objectMapper);
         result.setResponseCode(statusCode);
         result.setJsonString(responseBody);
         result.setJsonObject(jsonMap);
         result.setPathToResult(getPathToResult());
 
         if (isHttpSuccessful(statusCode)) {
-            if(jsonMap.has("errors") && jsonMap.get("errors").getAsBoolean())
+            if(jsonMap.has("errors") && jsonMap.get("errors").asBoolean())
             {
                 result.setSucceeded(false);
                 result.setErrorMessage("One or more of the items in the Bulk request failed, check BulkResult.getItems() for more information.");

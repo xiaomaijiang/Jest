@@ -14,7 +14,7 @@ public interface JestClient {
 
     <T extends JestResult> T execute(Action<T> clientRequest) throws IOException;
 
-    <T extends JestResult> void executeAsync(Action<T> clientRequest, JestResultHandler<? super T> jestResultHandler);
+    <T extends JestResult> void executeAsync(Action<T> clientRequest, JestResultHandler<? super T> jestResultHandler) throws IOException;
 
     void shutdownClient();
 

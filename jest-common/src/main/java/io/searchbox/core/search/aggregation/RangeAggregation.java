@@ -1,13 +1,15 @@
 package io.searchbox.core.search.aggregation;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import com.fasterxml.jackson.databind.JsonNode;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import static io.searchbox.core.search.aggregation.AggregationField.*;
+import static io.searchbox.core.search.aggregation.AggregationField.BUCKETS;
+import static io.searchbox.core.search.aggregation.AggregationField.DOC_COUNT;
+import static io.searchbox.core.search.aggregation.AggregationField.FROM;
+import static io.searchbox.core.search.aggregation.AggregationField.TO;
 
 /**
  * @author cfstout
@@ -18,17 +20,16 @@ public class RangeAggregation extends BucketAggregation {
 
     private List<Range> ranges;
 
-    public RangeAggregation(String name, JsonObject rangeAggregation) {
+    public RangeAggregation(String name, JsonNode rangeAggregation) {
         super(name, rangeAggregation);
-        ranges = new ArrayList<Range>();
+        ranges = new ArrayList<>();
         //todo support keyed:true as well
-        for (JsonElement bucketElement : rangeAggregation.get(String.valueOf(BUCKETS)).getAsJsonArray()) {
-            JsonObject bucket = bucketElement.getAsJsonObject();
+        for (JsonNode bucket : rangeAggregation.get(String.valueOf(BUCKETS))) {
             Range range = new Range(
                     bucket,
-                    bucket.has(String.valueOf(FROM)) ? bucket.get(String.valueOf(FROM)).getAsDouble() : null,
-                    bucket.has(String.valueOf(TO)) ? bucket.get(String.valueOf(TO)).getAsDouble() : null,
-                    bucket.get(String.valueOf(DOC_COUNT)).getAsLong());
+                    bucket.has(String.valueOf(FROM)) ? bucket.get(String.valueOf(FROM)).asDouble() : null,
+                    bucket.has(String.valueOf(TO)) ? bucket.get(String.valueOf(TO)).asDouble() : null,
+                    bucket.get(String.valueOf(DOC_COUNT)).asLong());
             ranges.add(range);
         }
     }

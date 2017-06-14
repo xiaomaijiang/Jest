@@ -1,6 +1,6 @@
 package io.searchbox.core;
 
-import com.google.gson.Gson;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.searchbox.client.JestResult;
 
 import java.util.List;
@@ -14,8 +14,8 @@ public class CountResult extends JestResult {
         super(countResult);
     }
 
-    public CountResult(Gson gson) {
-        super(gson);
+    public CountResult(ObjectMapper objectMapper) {
+        super(objectMapper);
     }
 
     @Override

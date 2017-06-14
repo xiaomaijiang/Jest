@@ -1,8 +1,9 @@
 package io.searchbox.action;
 
-import com.google.gson.Gson;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.searchbox.client.JestResult;
 
+import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -14,11 +15,11 @@ public interface Action<T extends JestResult> {
 
     String getRestMethodName();
 
-    String getData(Gson gson);
+    String getData(ObjectMapper objectMapper) throws IOException;
 
     String getPathToResult();
 
     Map<String, Object> getHeaders();
 
-    T createNewElasticSearchResult(String responseBody, int statusCode, String reasonPhrase, Gson gson);
+    T createNewElasticSearchResult(String responseBody, int statusCode, String reasonPhrase, ObjectMapper objectMapper) throws IOException;
 }

@@ -1,6 +1,6 @@
 package io.searchbox.indices;
 
-import com.google.gson.JsonObject;
+import com.fasterxml.jackson.databind.JsonNode;
 import io.searchbox.client.JestResult;
 import io.searchbox.common.AbstractIntegrationTest;
 import org.elasticsearch.test.ESIntegTestCase;
@@ -29,14 +29,14 @@ public class StatsIntegrationTest extends AbstractIntegrationTest {
         assertTrue(result.getErrorMessage(), result.isSucceeded());
 
         // confirm that response has all the default stats types
-        JsonObject jsonResult = result.getJsonObject();
-        JsonObject statsJson = jsonResult.getAsJsonObject("indices").getAsJsonObject(INDEX_NAME).getAsJsonObject("total");
+        JsonNode jsonResult = result.getJsonObject();
+        JsonNode statsJson = jsonResult.get("indices").get(INDEX_NAME).get("total");
         assertNotNull(statsJson);
-        assertNotNull(statsJson.getAsJsonObject("docs"));
-        assertNotNull(statsJson.getAsJsonObject("store"));
-        assertNotNull(statsJson.getAsJsonObject("indexing"));
-        assertNotNull(statsJson.getAsJsonObject("get"));
-        assertNotNull(statsJson.getAsJsonObject("search"));
+        assertNotNull(statsJson.get("docs"));
+        assertNotNull(statsJson.get("store"));
+        assertNotNull(statsJson.get("indexing"));
+        assertNotNull(statsJson.get("get"));
+        assertNotNull(statsJson.get("search"));
     }
 
     @Test
@@ -53,12 +53,12 @@ public class StatsIntegrationTest extends AbstractIntegrationTest {
         assertTrue(result.getErrorMessage(), result.isSucceeded());
 
         // Confirm that response has only flush and indexing stats types
-        JsonObject jsonResult = result.getJsonObject();
-        JsonObject statsJson = jsonResult.getAsJsonObject("indices").getAsJsonObject(STATS_WITH_OPTIONS_INDEX_NAME).getAsJsonObject("total");
+        JsonNode jsonResult = result.getJsonObject();
+        JsonNode statsJson = jsonResult.get("indices").get(STATS_WITH_OPTIONS_INDEX_NAME).get("total");
         assertNotNull(statsJson);
-        assertNotNull(statsJson.getAsJsonObject("flush"));
-        assertNotNull(statsJson.getAsJsonObject("indexing"));
-        assertEquals("Number of stats received", 2, statsJson.entrySet().size());
+        assertNotNull(statsJson.get("flush"));
+        assertNotNull(statsJson.get("indexing"));
+        assertEquals("Number of stats received", 2, statsJson.size());
     }
 
 }

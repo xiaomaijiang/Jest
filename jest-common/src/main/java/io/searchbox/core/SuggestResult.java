@@ -1,7 +1,7 @@
 package io.searchbox.core;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.searchbox.client.JestResult;
 
 import java.util.ArrayList;
@@ -18,27 +18,32 @@ public class SuggestResult extends JestResult {
         super(suggestResult);
     }
 
-    public SuggestResult(Gson gson) {
-        super(gson);
+    public SuggestResult(ObjectMapper objectMapper) {
+        super(objectMapper);
     }
 
     public List<Suggestion> getSuggestions(String suggestionName) {
         List<Suggestion> suggestions = new ArrayList<Suggestion>();
 
         if (jsonObject != null && jsonObject.has(suggestionName)) {
-            for (JsonElement suggestionElement : jsonObject.getAsJsonArray(suggestionName)) {
-                suggestions.add(gson.fromJson(suggestionElement, Suggestion.class));
+            for (JsonNode suggestionElement : jsonObject.get(suggestionName)) {
+                final Suggestion suggestion = objectMapper.convertValue(suggestionElement, Suggestion.class);
+                suggestions.add(suggestion);
             }
         }
 
         return suggestions;
     }
 
-    public class Suggestion {
-        public final String text;
-        public final Integer offset;
-        public final Integer length;
-        public final List<Map<String, Object>> options;
+    public static class Suggestion {
+        public String text;
+        public Integer offset;
+        public Integer length;
+        public List<Map<String, Object>> options;
+
+        public Suggestion() {
+
+        }
 
         public Suggestion(String text, Integer offset, Integer length, List<Map<String, Object>> options) {
             this.text = text;

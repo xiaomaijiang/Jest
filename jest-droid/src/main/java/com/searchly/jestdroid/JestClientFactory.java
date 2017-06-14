@@ -1,6 +1,6 @@
 package com.searchly.jestdroid;
 
-import com.google.gson.Gson;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.searchbox.client.JestClient;
 import io.searchbox.client.config.discovery.NodeChecker;
 import io.searchbox.client.config.idle.IdleConnectionReaper;
@@ -85,10 +85,10 @@ public class JestClientFactory {
                     .setProxyAuthenticationStrategy(droidClientConfig.getProxyAuthenticationStrategy())
                     .setRoutePlanner(droidClientConfig.getHttpRoutePlanner());
 
-            // set custom gson instance
-            Gson gson = droidClientConfig.getGson();
-            if (gson != null) {
-                client.setGson(gson);
+            // set custom ObjectMapper instance
+            ObjectMapper objectMapper = droidClientConfig.getObjectMapper();
+            if (objectMapper != null) {
+                client.setObjectMapper(objectMapper);
             }
 
             client.setHttpClient(httpClientBuilder.build());
