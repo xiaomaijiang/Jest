@@ -62,6 +62,8 @@ public class JestClientFactory {
         client.setHttpClient(createHttpClient(connectionManager));
         client.setAsyncClient(createAsyncHttpClient(asyncConnectionManager));
 
+        client.setRetryHandler(httpClientConfig.getRetryHandler());
+
         // set custom ObjectMapper instance
         ObjectMapper objectMapper = httpClientConfig.getObjectMapper();
         if (objectMapper == null) {

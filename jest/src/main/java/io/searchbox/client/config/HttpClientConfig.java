@@ -1,10 +1,13 @@
 package io.searchbox.client.config;
 
+import io.searchbox.client.JestRetryHandler;
+import io.searchbox.client.NoopRetryHandler;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.AuthenticationStrategy;
 import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.conn.routing.HttpRoute;
 import org.apache.http.conn.routing.HttpRoutePlanner;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
@@ -42,6 +45,7 @@ public class HttpClientConfig extends ClientConfig {
     private final AuthenticationStrategy proxyAuthenticationStrategy;
     private final SchemeIOSessionStrategy httpIOSessionStrategy;
     private final SchemeIOSessionStrategy httpsIOSessionStrategy;
+    private final JestRetryHandler<HttpUriRequest> retryHandler;
     private Set<HttpHost> preemptiveAuthTargetHosts;
 
     public HttpClientConfig(Builder builder) {
@@ -56,6 +60,7 @@ public class HttpClientConfig extends ClientConfig {
         this.proxyAuthenticationStrategy = builder.proxyAuthenticationStrategy;
         this.httpIOSessionStrategy = builder.httpIOSessionStrategy;
         this.httpsIOSessionStrategy = builder.httpsIOSessionStrategy;
+        this.retryHandler = builder.retryHandler;
         this.preemptiveAuthTargetHosts = builder.preemptiveAuthTargetHosts;
     }
 
@@ -99,6 +104,10 @@ public class HttpClientConfig extends ClientConfig {
         return httpsIOSessionStrategy;
     }
 
+    public JestRetryHandler<HttpUriRequest> getRetryHandler() {
+        return retryHandler;
+    }
+
     public Set<HttpHost> getPreemptiveAuthTargetHosts() {
         return preemptiveAuthTargetHosts;
     }
@@ -115,6 +124,7 @@ public class HttpClientConfig extends ClientConfig {
         private AuthenticationStrategy proxyAuthenticationStrategy;
         private SchemeIOSessionStrategy httpIOSessionStrategy;
         private SchemeIOSessionStrategy httpsIOSessionStrategy;
+        private JestRetryHandler<HttpUriRequest> retryHandler;
         private Set<HttpHost> preemptiveAuthTargetHosts = Collections.emptySet();
 
         public Builder(HttpClientConfig httpClientConfig) {
@@ -241,6 +251,11 @@ public class HttpClientConfig extends ClientConfig {
             return this;
         }
 
+        public Builder retryHandler(JestRetryHandler<HttpUriRequest> retryHandler) {
+            this.retryHandler = retryHandler;
+            return this;
+        }
+
         /**
          * Sets preemptive authentication for the specified <b>target host</b> by pre-populating an authentication data cache.
          * <p>
@@ -295,6 +310,9 @@ public class HttpClientConfig extends ClientConfig {
             }
             if(this.httpsIOSessionStrategy == null) {
                 this.httpsIOSessionStrategy = SSLIOSessionStrategy.getSystemDefaultStrategy();
+            }
+            if(this.retryHandler == null) {
+                this.retryHandler = new NoopRetryHandler<>();
             }
 
             if (preemptiveAuthSetWithoutCredentials()) {

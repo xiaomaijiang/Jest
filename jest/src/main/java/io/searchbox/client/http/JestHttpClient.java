@@ -6,6 +6,7 @@ import io.searchbox.action.Action;
 import io.searchbox.client.AbstractJestClient;
 import io.searchbox.client.JestResult;
 import io.searchbox.client.JestResultHandler;
+import io.searchbox.client.JestRetryHandler;
 import io.searchbox.client.config.exception.CouldNotConnectException;
 import io.searchbox.client.http.apache.HttpDeleteWithEntity;
 import io.searchbox.client.http.apache.HttpGetWithEntity;
@@ -33,6 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.net.ConnectException;
 import java.util.Map.Entry;
 import java.util.concurrent.Future;
 
@@ -50,10 +52,11 @@ public class JestHttpClient extends AbstractJestClient {
     private CloseableHttpAsyncClient asyncClient;
 
     private HttpClientContext httpClientContextTemplate;
+    private JestRetryHandler<HttpUriRequest> retryHandler;
 
     /**
-     * @throws IOException in case of a problem or the connection was aborted during request,
-     *                     or in case of a problem while reading the response stream
+     * @throws IOException              in case of a problem or the connection was aborted during request,
+     *                                  or in case of a problem while reading the response stream
      * @throws CouldNotConnectException if an {@link HttpHostConnectException} is encountered
      */
     @Override
@@ -62,13 +65,27 @@ public class JestHttpClient extends AbstractJestClient {
     }
 
     public <T extends JestResult> T execute(Action<T> clientRequest, RequestConfig requestConfig) throws IOException {
-        HttpUriRequest request = prepareRequest(clientRequest, requestConfig);
+        final JestRetryHandler<HttpUriRequest> retryHandler = getRetryHandler();
+
+        int executionCount = 0;
         CloseableHttpResponse response = null;
         try {
-            response = executeRequest(request);
+            HttpUriRequest request;
+            do {
+                request = prepareRequest(clientRequest, requestConfig);
+                try {
+                    response = executeRequest(request);
+                } catch (HttpHostConnectException ex) {
+                    if (!retryHandler.retryRequest(ex, executionCount++, request)) {
+                        throw new CouldNotConnectException(ex.getHost().toURI(), ex);
+                    }
+                } catch (ConnectException ex) {
+                    if (!retryHandler.retryRequest(ex, executionCount++, request)) {
+                        throw ex;
+                    }
+                }
+            } while (response == null);
             return deserializeResponse(response, request, clientRequest);
-        } catch (HttpHostConnectException ex) {
-            throw new CouldNotConnectException(ex.getHost().toURI(), ex);
         } finally {
             if (response != null) {
                 try {
@@ -241,6 +258,15 @@ public class JestHttpClient extends AbstractJestClient {
 
     public void setHttpClientContextTemplate(HttpClientContext httpClientContext) {
         this.httpClientContextTemplate = httpClientContext;
+    }
+
+    public JestRetryHandler<HttpUriRequest> getRetryHandler() {
+        return retryHandler;
+    }
+
+    public JestHttpClient setRetryHandler(JestRetryHandler<HttpUriRequest> retryHandler) {
+        this.retryHandler = retryHandler;
+        return this;
     }
 
     protected class DefaultCallback<T extends JestResult> implements FutureCallback<HttpResponse> {
