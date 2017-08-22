@@ -50,7 +50,7 @@ public abstract class AbstractIntegrationTest extends ESIntegTestCase {
     @After
     public void tearDown() throws Exception {
         super.tearDown();
-        client.shutdownClient();
+        client.close();
         client = null;
     }
 
