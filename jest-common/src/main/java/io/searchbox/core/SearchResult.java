@@ -190,10 +190,10 @@ public class SearchResult extends JestResult {
         return retval;
     }
 
-    public Integer getTotal() {
-        Integer total = null;
+    public Long getTotal() {
+        Long total = null;
         JsonNode obj = getPath(PATH_TO_TOTAL);
-        if (obj != null) total = obj.asInt();
+        if (obj != null) total = obj.asLong();
         return total;
     }
 
