@@ -149,7 +149,7 @@ public class SearchIntegrationTest extends AbstractIntegrationTest {
         assertNotNull(explanation);
         logger.info("Explanation = {}", explanation);
 
-        assertEquals(new Integer(1), result.getTotal());
+        assertEquals(new Long(1L), result.getTotal());
         assertEquals(new Float("0.3068528175354004"), result.getMaxScore());
     }
 
