@@ -12,6 +12,7 @@ import io.searchbox.client.config.idle.IdleConnectionReaper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Set;
@@ -64,7 +65,20 @@ public abstract class AbstractJestClient implements JestClient {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public void shutdownClient() {
+        try {
+            close();
+        } catch (IOException e) {
+            log.error("Error while shutting down client", e);
+        }
+    }
+
+    @Override
+    public void close() throws IOException {
         if (null != nodeChecker) {
             nodeChecker.stopAsync();
             nodeChecker.awaitTerminated();
