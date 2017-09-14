@@ -22,6 +22,16 @@ import static org.junit.Assert.assertTrue;
 public class MultiSearchTest {
 
     @Test
+    public void multiSearchHasCorrectContentType() throws JSONException, IOException {
+        Search search = new Search.Builder("").build();
+        MultiSearch multiSearch = new MultiSearch.Builder(search).build();
+
+        assertEquals("POST", multiSearch.getRestMethodName());
+        assertEquals("/_msearch", multiSearch.getURI());
+        assertEquals("application/x-ndjson", multiSearch.getHeader("Content-Type"));
+    }
+
+    @Test
     public void singleMultiSearchWithoutIndex() throws JSONException, IOException {
         String expectedData = " {\"index\" : \"_all\"}\n" +
                 "{\"query\" : {\"match_all\" : {}}}\n";
