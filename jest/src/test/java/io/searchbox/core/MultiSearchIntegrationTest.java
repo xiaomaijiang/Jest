@@ -54,6 +54,7 @@ public class MultiSearchIntegrationTest extends AbstractIntegrationTest {
         assertFalse(complexSearchResponse.isError);
         assertNull(complexSearchResponse.errorMessage);
         SearchResult complexSearchResult = complexSearchResponse.searchResult;
+        assertNotNull(complexSearchResult);
         assertTrue(complexSearchResult.isSucceeded());
         assertNull(complexSearchResult.getErrorMessage());
         assertEquals(Long.valueOf(2L), complexSearchResult.getTotal());
@@ -64,6 +65,7 @@ public class MultiSearchIntegrationTest extends AbstractIntegrationTest {
         assertFalse(simpleSearchResponse.isError);
         assertNull(simpleSearchResponse.errorMessage);
         SearchResult simpleSearchResult = simpleSearchResponse.searchResult;
+        assertNotNull(simpleSearchResult);
         assertTrue(simpleSearchResult.isSucceeded());
         assertNull(simpleSearchResult.getErrorMessage());
         assertEquals(Long.valueOf(3L), simpleSearchResult.getTotal());
