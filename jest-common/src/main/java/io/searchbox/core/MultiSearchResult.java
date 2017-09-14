@@ -2,6 +2,7 @@ package io.searchbox.core;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.MissingNode;
 import io.searchbox.client.JestResult;
 
 import java.util.ArrayList;
@@ -25,9 +26,9 @@ public class MultiSearchResult extends JestResult {
     public List<MultiSearchResponse> getResponses() {
         List<MultiSearchResponse> multiSearchResponses = new ArrayList<MultiSearchResponse>();
 
-        if(jsonObject != null && jsonObject.has(RESPONSES_KEY)) {
+        if (jsonObject != null && jsonObject.has(RESPONSES_KEY)) {
             JsonNode responsesArray = jsonObject.get(RESPONSES_KEY);
-            for(JsonNode responseElement : responsesArray) {
+            for (JsonNode responseElement : responsesArray) {
                 multiSearchResponses.add(new MultiSearchResponse(responseElement));
             }
         }
@@ -39,24 +40,27 @@ public class MultiSearchResult extends JestResult {
 
         public final boolean isError;
         public final String errorMessage;
+        public final JsonNode error;
         public final SearchResult searchResult;
 
         public MultiSearchResponse(JsonNode jsonObject) {
             final JsonNode error = jsonObject.get(ERROR_KEY);
-            if(error != null) {
-                isError = true;
-                errorMessage = error.asText();
-                searchResult = null;
+            if (error != null) {
+                this.isError = true;
+                this.error = error;
+                this.errorMessage = error.path("reason").asText();
+                this.searchResult = null;
             } else {
-                isError = false;
-                errorMessage = null;
+                this.isError = false;
+                this.errorMessage = null;
+                this.error = MissingNode.getInstance();
 
-                searchResult = new SearchResult(objectMapper);
-                searchResult.setSucceeded(true);
-                searchResult.setResponseCode(responseCode);
-                searchResult.setJsonObject(jsonObject);
-                searchResult.setJsonString(jsonObject.toString());
-                searchResult.setPathToResult("hits/hits/_source");
+                this.searchResult = new SearchResult(objectMapper);
+                this.searchResult.setSucceeded(true);
+                this.searchResult.setResponseCode(responseCode);
+                this.searchResult.setJsonObject(jsonObject);
+                this.searchResult.setJsonString(jsonObject.toString());
+                this.searchResult.setPathToResult("hits/hits/_source");
             }
         }
     }
