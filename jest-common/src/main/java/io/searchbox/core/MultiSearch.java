@@ -1,6 +1,7 @@
 package io.searchbox.core;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.CharMatcher;
 import io.searchbox.action.AbstractAction;
 import io.searchbox.action.GenericResultAbstractAction;
 import io.searchbox.strings.StringUtils;
@@ -16,6 +17,7 @@ import java.util.Objects;
  * @author cihat keser
  */
 public class MultiSearch extends AbstractAction<MultiSearchResult> {
+    private static final CharMatcher NEWLINE_MATCHER = CharMatcher.anyOf("\r\n").precomputed();
 
     private Collection<Search> searches;
 
@@ -55,23 +57,25 @@ public class MultiSearch extends AbstractAction<MultiSearchResult> {
             sb.append(getParameter(search, "ignore_unavailable"));
             sb.append(getParameter(search, "allow_no_indices"));
             sb.append(getParameter(search, "expand_wildcards"));
+            final String query = NEWLINE_MATCHER.removeFrom(search.getData(objectMapper));
             sb.append("\"}\n")
-                    .append(search.getData(objectMapper))
+                    .append(query)
                     .append("\n");
         }
         return sb.toString();
     }
 
     private String getParameter(Search search, String parameter) {
-        Collection<Object> searchParameter = search.getParameter(parameter);
-        if (searchParameter != null)
-            if (searchParameter != null) {
-                if (searchParameter.size() == 1) {
-                    return "\", \"" + parameter + "\" : \"" + searchParameter.iterator().next();
-                } else if (searchParameter.size() > 1) {
-                    throw new IllegalArgumentException("Expecting a single value for '" + parameter + "' parameter, you provided: " + searchParameter.size());
-                }
+        final Collection<Object> searchParameter = search.getParameter(parameter);
+        if (searchParameter != null) {
+            final int parameters = searchParameter.size();
+            if (parameters == 1) {
+                return "\", \"" + parameter + "\" : \"" + searchParameter.iterator().next();
+            } else if (parameters > 1) {
+                throw new IllegalArgumentException("Expecting a single value for '" + parameter + "' parameter, you provided: " + parameters);
             }
+        }
+
         return "";
     }
 
@@ -102,7 +106,7 @@ public class MultiSearch extends AbstractAction<MultiSearchResult> {
     }
 
     public static class Builder extends GenericResultAbstractAction.Builder<MultiSearch, Builder> {
-        private List<Search> searchList = new LinkedList<Search>();
+        private List<Search> searchList = new LinkedList<>();
 
         public Builder(Search search) {
             searchList.add(search);
