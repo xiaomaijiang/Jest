@@ -79,7 +79,7 @@ public class JestHttpClient extends AbstractJestClient {
                     if (!retryHandler.retryRequest(ex, executionCount++, request)) {
                         throw new CouldNotConnectException(ex.getHost().toURI(), ex);
                     }
-                } catch (ConnectException ex) {
+                } catch (Exception ex) {
                     if (!retryHandler.retryRequest(ex, executionCount++, request)) {
                         throw ex;
                     }
