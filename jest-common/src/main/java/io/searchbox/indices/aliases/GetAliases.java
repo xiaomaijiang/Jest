@@ -20,7 +20,7 @@ public class GetAliases extends GenericResultAbstractAction {
 
     @Override
     protected String buildURI() {
-        return super.buildURI() + "/_aliases";
+        return super.buildURI() + "/_alias";
     }
 
     public static class Builder extends AbstractMultiIndexActionBuilder<GetAliases, Builder> {
